@@ -163,6 +163,12 @@
                     <span class="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-slate-900/80 text-emerald-400 border border-emerald-500/30">index.html</span>
                 </a>
 
+                <!-- Toggle Views List Sidebar Button -->
+                <button id="btn-toggle-views-sidebar" onclick="toggleViewsSidebar()" class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-900/90 hover:bg-slate-800 text-emerald-300 border border-emerald-500/40 transition shadow backdrop-blur cursor-pointer" title="Toggle Views List Sidebar (Show/Hide)">
+                    <i class="fa-solid fa-table-list text-emerald-400"></i>
+                    <span id="label-toggle-sidebar">Views Sidebar</span>
+                </button>
+
                 <!-- Dollhouse Walls vs Full Walls Toggle -->
                 <div class="flex items-center bg-slate-950 p-0.5 rounded-lg border border-slate-800" title="Wall height mode">
                     <button id="wall-mode-dollhouse" onclick="setWallHeightMode('dollhouse')" class="px-2 py-0.5 rounded-md text-[11px] font-medium text-slate-400 hover:text-white transition">
@@ -344,6 +350,9 @@
                     <span id="vl-count-badge" class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
                         9 OF 9 VIEWS
                     </span>
+                    <button onclick="toggleViewsSidebar()" class="w-6 h-6 rounded flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-800 transition" title="Hide Views Sidebar">
+                        <i class="fa-solid fa-xmark text-xs"></i>
+                    </button>
                 </div>
             </div>
             <p class="text-[11px] text-slate-400 leading-snug">Click any view to display on Left. Interactive 3D Models &amp; 2D CAD Plans.</p>
@@ -1963,7 +1972,7 @@
                     // Invisible raycast target for clicking P2 in WebGL
                     const voidHit = new THREE.Mesh(
                         new THREE.BoxGeometry(el.w, 0.1, el.d),
-                        new THREE.MeshBasicMaterial({ color: 0xf59e0b, transparent: true, opacity: 0.08 })
+                        new THREE.MeshStandardMaterial({ color: 0xf59e0b, transparent: true, opacity: 0.08, roughness: 1 })
                     );
                     voidHit.position.set(el.x + el.w / 2, 0.05, el.z + el.d / 2);
                     voidHit.userData = { elementId: el.id, skipSoftwareRender: true };
@@ -2858,6 +2867,7 @@
             // Highlight 3D Mesh (plus softly highlight connected rooms when a door is clicked!)
             const connectedIds = (el.category === 'doors' && el.connections) ? el.connections : [];
             interactiveMeshes.forEach(mesh => {
+                if (!mesh || !mesh.material || mesh.material instanceof THREE.MeshBasicMaterial) return;
                 const mId = mesh.userData.elementId;
                 const isSel = (mId === id);
                 const isConn = connectedIds.includes(mId);
@@ -3577,6 +3587,34 @@
             // Restore Studio 3D Mode
             switchMainMode('3d');
             activatePresentationSuite(1);
+            setTimeout(onWindowResize, 60);
+        }
+
+        let isViewsSidebarVisible = true;
+        function toggleViewsSidebar() {
+            isViewsSidebarVisible = !isViewsSidebarVisible;
+            const sidebar = document.getElementById('viewlist-sidebar');
+            const btn = document.getElementById('btn-toggle-views-sidebar');
+            const label = document.getElementById('label-toggle-sidebar');
+            if (!sidebar) return;
+
+            if (isViewsSidebarVisible) {
+                sidebar.classList.remove('hidden');
+                sidebar.classList.add('flex');
+                if (btn) {
+                    btn.classList.add('border-emerald-500/40', 'text-emerald-300');
+                    btn.classList.remove('border-slate-700', 'text-slate-400');
+                }
+                if (label) label.innerText = 'Views Sidebar';
+            } else {
+                sidebar.classList.add('hidden');
+                sidebar.classList.remove('flex');
+                if (btn) {
+                    btn.classList.remove('border-emerald-500/40', 'text-emerald-300');
+                    btn.classList.add('border-slate-700', 'text-slate-400');
+                }
+                if (label) label.innerText = 'Show Views List';
+            }
             setTimeout(onWindowResize, 60);
         }
 
