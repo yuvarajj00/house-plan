@@ -186,22 +186,76 @@
             </button>
         </div>
 
-        <!-- Viewport Switcher (3D / 2D CAD / Cross-Section / Split) -->
+        <!-- Viewport Switcher (3D / 2D CAD / Cross-Section / Split / View List) -->
         <div class="flex items-center bg-slate-950 p-1 rounded-xl border border-slate-800 gap-1">
-            <button id="tab-3d" onclick="switchMainMode('3d')" class="px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-800 text-emerald-400 border border-emerald-500/40 transition">
+            <button id="tab-3d" onclick="if(isViewListActive) exitViewListScreen(); switchMainMode('3d')" class="px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-800 text-emerald-400 border border-emerald-500/40 transition">
                 <i class="fa-solid fa-cube mr-1"></i>3D View
             </button>
-            <button id="tab-2d" onclick="switchMainMode('2d')" class="px-2.5 py-1 rounded-lg text-xs font-medium text-slate-400 hover:text-white transition">
+            <button id="tab-2d" onclick="if(isViewListActive) exitViewListScreen(); switchMainMode('2d')" class="px-2.5 py-1 rounded-lg text-xs font-medium text-slate-400 hover:text-white transition">
                 <i class="fa-solid fa-ruler-combined mr-1"></i>2D CAD Plan
             </button>
-            <button id="tab-section" onclick="switchMainMode('section')" class="px-2.5 py-1 rounded-lg text-xs font-medium text-slate-400 hover:text-white transition">
+            <button id="tab-section" onclick="if(isViewListActive) exitViewListScreen(); switchMainMode('section')" class="px-2.5 py-1 rounded-lg text-xs font-medium text-slate-400 hover:text-white transition">
                 <i class="fa-solid fa-scissors mr-1"></i>2D Cross-Section
             </button>
-            <button id="tab-split" onclick="switchMainMode('split')" class="hidden xl:inline-flex px-2.5 py-1 rounded-lg text-xs font-medium text-slate-400 hover:text-white transition">
+            <button id="tab-split" onclick="if(isViewListActive) exitViewListScreen(); switchMainMode('split')" class="hidden xl:inline-flex px-2.5 py-1 rounded-lg text-xs font-medium text-slate-400 hover:text-white transition">
                 <i class="fa-solid fa-columns mr-1"></i>Split
             </button>
+            <a id="tab-viewlist" href="views.html" class="px-3 py-1 rounded-lg text-xs font-semibold bg-emerald-600/30 hover:bg-emerald-600/40 text-emerald-300 border border-emerald-500/50 transition flex items-center gap-1.5 cursor-pointer" title="Go to Dedicated Plain Views Screen (views.html)">
+                <i class="fa-solid fa-table-list text-emerald-400"></i>
+                <span>View List</span>
+            </a>
         </div>
+
+        <!-- Standalone Standout 'Create / Go to View List' Button -->
+        <a id="btn-goto-view-list" href="views.html" class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-gradient-to-r from-emerald-500 via-emerald-400 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-slate-950 shadow-lg shadow-emerald-500/25 flex items-center gap-2 transition-all transform hover:scale-[1.02] active:scale-[0.98] cursor-pointer border border-emerald-300/40" title="Open Dedicated Plain Views Screen (views.html)">
+            <i class="fa-solid fa-list-check text-slate-950 text-sm"></i>
+            <span>View List Screen</span>
+            <span class="px-1.5 py-0.5 rounded text-[9px] font-mono font-extrabold bg-slate-950/20 text-slate-950 uppercase tracking-wider">views.html</span>
+        </a>
     </header>
+
+    <!-- ==================== VIEW LIST SCREEN TOP BANNER (Active in View List Screen) ==================== -->
+    <div id="viewlist-top-banner" class="hidden bg-slate-900/98 backdrop-blur-md border-b border-emerald-500/40 px-3 sm:px-4 py-2 flex flex-wrap items-center justify-between gap-2 z-30 shrink-0 shadow-2xl">
+        <div class="flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-lg bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shrink-0 shadow-inner">
+                <i class="fa-solid fa-table-list text-sm"></i>
+            </div>
+            <div>
+                <div class="flex items-center gap-2">
+                    <span class="font-bold text-xs sm:text-sm text-white">Architectural Views Gallery Screen</span>
+                    <span id="vl-banner-type-badge" class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">3D ELEVATION</span>
+                </div>
+                <p id="vl-banner-subtitle" class="text-[11px] text-slate-400">Selected view displayed on Left &bull; Interactive views list on Right &bull; Supports 3D &amp; 2D</p>
+            </div>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2">
+            <!-- Active View Title Pill -->
+            <div class="hidden md:flex items-center gap-1.5 px-3 py-1 rounded-lg bg-slate-950 border border-slate-800 text-xs">
+                <span class="text-slate-400">Selected View:</span>
+                <span id="vl-banner-title" class="font-semibold text-emerald-300 truncate max-w-xs">1. 3D Full Exterior + Roof Elevation</span>
+            </div>
+
+            <!-- Lighting Quick Toggle (Day / Sunset / Dusk) -->
+            <div id="vl-banner-lighting-wrap" class="flex items-center bg-slate-950 p-0.5 rounded-lg border border-slate-800">
+                <button id="vl-top-light-day" onclick="setViewListLighting('day')" class="px-2.5 py-1 rounded-md text-[11px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 transition">
+                    <i class="fa-solid fa-sun mr-1 text-amber-400"></i>Day
+                </button>
+                <button id="vl-top-light-golden" onclick="setViewListLighting('golden')" class="px-2.5 py-1 rounded-md text-[11px] font-medium text-slate-400 hover:text-amber-300 transition">
+                    <i class="fa-solid fa-cloud-sun mr-1 text-amber-500"></i>Sunset
+                </button>
+                <button id="vl-top-light-dusk" onclick="setViewListLighting('dusk')" class="px-2.5 py-1 rounded-md text-[11px] font-medium text-slate-400 hover:text-indigo-300 transition">
+                    <i class="fa-solid fa-moon mr-1 text-indigo-400"></i>Dusk
+                </button>
+            </div>
+
+            <!-- Back to Studio Mode Button -->
+            <button onclick="exitViewListScreen()" class="px-3.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white border border-slate-700 hover:border-slate-600 text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer shadow">
+                <i class="fa-solid fa-arrow-left text-emerald-400"></i>
+                <span>Back to Studio Mode</span>
+            </button>
+        </div>
+    </div>
 
     <!-- ==================== 2. DYNAMIC CONTROLS & SLIDERS BAR ==================== -->
     <div class="bg-slate-900/80 border-b border-slate-800/90 px-3 sm:px-4 py-1.5 flex flex-wrap items-center justify-between gap-2 text-xs z-20 shrink-0">
@@ -300,7 +354,7 @@
                 <div id="hotspots-container" class="absolute inset-0 pointer-events-none overflow-hidden"></div>
 
                 <!-- TOP-LEFT CONTEXTUAL CAMERA PRESET BAR (Changes based on selected Suite 1-5) -->
-                <div class="absolute top-3 left-3 right-3 sm:right-auto bg-slate-900/90 backdrop-blur-md border border-slate-800 rounded-xl p-2.5 max-w-xl pointer-events-auto shadow-2xl">
+                <div id="studio-camera-bar" class="absolute top-3 left-3 right-3 sm:right-auto bg-slate-900/90 backdrop-blur-md border border-slate-800 rounded-xl p-2.5 max-w-xl pointer-events-auto shadow-2xl">
                     <div class="flex items-center justify-between gap-3 mb-1.5">
                         <span id="suite-banner-title" class="text-[11px] font-mono uppercase tracking-wider text-emerald-400 font-bold flex items-center gap-1.5">
                             <i class="fa-solid fa-video"></i>
@@ -312,6 +366,63 @@
                     </div>
                     <!-- Dynamic Camera Preset Buttons -->
                     <div id="suite-camera-buttons" class="flex flex-wrap gap-1.5"></div>
+                </div>
+
+                <!-- TOP-LEFT VIEW LIST 3D HUD OVERLAY (Shown in View List Mode) -->
+                <div id="viewlist-3d-hud" class="hidden absolute top-3 left-3 right-3 sm:right-auto bg-slate-900/95 backdrop-blur-md border border-emerald-500/40 rounded-xl p-3 max-w-xl pointer-events-auto shadow-2xl z-20">
+                    <div class="flex items-center justify-between gap-3 mb-1.5">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                            <span id="vl-hud-title" class="text-xs font-mono font-bold uppercase tracking-wider text-emerald-300">
+                                1. 3D Full Exterior + Roof Elevation
+                            </span>
+                        </div>
+                        <span id="vl-hud-badge" class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                            SOUTH ELEVATION
+                        </span>
+                    </div>
+
+                    <div id="vl-hud-tags" class="flex flex-wrap gap-1 mb-2">
+                        <span class="px-1.5 py-0.5 rounded text-[10px] font-mono bg-slate-800 text-slate-300 border border-slate-700">Full Walls (10')</span>
+                        <span class="px-1.5 py-0.5 rounded text-[10px] font-mono bg-slate-800 text-slate-300 border border-slate-700">Zone Colors</span>
+                        <span class="px-1.5 py-0.5 rounded text-[10px] font-mono bg-slate-800 text-slate-300 border border-slate-700">Day &amp; Dusk Elevation</span>
+                    </div>
+
+                    <!-- Lighting Switcher -->
+                    <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-800">
+                        <div class="flex items-center gap-1.5">
+                            <span class="text-[11px] text-slate-400 font-medium">Elevation Lighting:</span>
+                            <button id="vl-hud-light-day" onclick="setViewListLighting('day')" class="px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 transition">
+                                <i class="fa-solid fa-sun mr-1 text-amber-400"></i>Day Elevation
+                            </button>
+                            <button id="vl-hud-light-dusk" onclick="setViewListLighting('dusk')" class="px-2 py-0.5 rounded text-[11px] font-medium text-slate-400 hover:text-indigo-300 bg-slate-800 border border-slate-700 transition">
+                                <i class="fa-solid fa-moon mr-1 text-indigo-400"></i>Dusk Lights
+                            </button>
+                            <button id="vl-hud-light-golden" onclick="setViewListLighting('golden')" class="px-2 py-0.5 rounded text-[11px] font-medium text-slate-400 hover:text-amber-300 bg-slate-800 border border-slate-700 transition">
+                                <i class="fa-solid fa-cloud-sun mr-1 text-amber-500"></i>Sunset
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Elevation Perspective Presets -->
+                    <div class="flex flex-wrap items-center gap-1 mt-2 pt-2 border-t border-slate-800/80">
+                        <span class="text-[10px] font-mono text-slate-400 uppercase mr-1">Elevation Angles:</span>
+                        <button onclick="setViewListElevationAngle('south')" class="px-2 py-0.5 rounded text-[10px] font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 hover:border-emerald-500/40 transition">
+                            South (Front Street)
+                        </button>
+                        <button onclick="setViewListElevationAngle('east')" class="px-2 py-0.5 rounded text-[10px] font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 hover:border-emerald-500/40 transition">
+                            East (Balcony 2)
+                        </button>
+                        <button onclick="setViewListElevationAngle('north')" class="px-2 py-0.5 rounded text-[10px] font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 hover:border-emerald-500/40 transition">
+                            North (Back)
+                        </button>
+                        <button onclick="setViewListElevationAngle('west')" class="px-2 py-0.5 rounded text-[10px] font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 hover:border-emerald-500/40 transition">
+                            West (Stairs)
+                        </button>
+                        <button onclick="setViewListElevationAngle('iso')" class="px-2 py-0.5 rounded text-[10px] font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 hover:border-emerald-500/40 transition">
+                            3D Isometric
+                        </button>
+                    </div>
                 </div>
 
                 <!-- TOP-RIGHT 3D COLOR & FINISHES LEGEND -->
@@ -466,10 +577,45 @@
                 </div>
             </div>
 
+            <!-- ==================== D. DEDICATED VIEW LIST 2D BLUEPRINT VIEWPORT ==================== -->
+            <div id="panel-viewlist-2d" class="hidden flex-1 h-full overflow-y-auto blueprint-grid p-4 flex-col gap-3 border-l border-slate-800">
+                <!-- 2D View List Toolbar -->
+                <div class="bg-slate-900/95 border border-slate-800 rounded-xl p-3 flex flex-wrap items-center justify-between gap-3 shrink-0 shadow-lg">
+                    <div>
+                        <h2 id="vl-2d-title" class="text-sm font-bold text-white flex items-center gap-2">
+                            <i class="fa-solid fa-compass-drafting text-emerald-400"></i>
+                            <span>2D Architectural CAD Blueprint</span>
+                        </h2>
+                        <p id="vl-2d-desc" class="text-xs text-slate-400 mt-0.5">Dimensioned CAD Drawing.</p>
+                    </div>
+                    <div class="flex items-center gap-1.5 bg-slate-950 p-1 rounded-lg border border-slate-800">
+                        <button onclick="selectViewListItem(4)" id="vl-2d-btn-g" class="px-2.5 py-1 rounded text-xs font-medium text-slate-300 hover:text-white transition">
+                            Ground CAD
+                        </button>
+                        <button onclick="selectViewListItem(5)" id="vl-2d-btn-f" class="px-2.5 py-1 rounded text-xs font-medium text-slate-300 hover:text-white transition">
+                            First CAD (P2)
+                        </button>
+                        <button onclick="selectViewListItem(6)" id="vl-2d-btn-o" class="px-2.5 py-1 rounded text-xs font-medium text-slate-300 hover:text-white transition">
+                            Overlay
+                        </button>
+                        <button onclick="selectViewListItem(7)" id="vl-2d-btn-s" class="px-2.5 py-1 rounded text-xs font-medium text-slate-300 hover:text-white transition">
+                            Section A-A
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Main SVG Drawing Card -->
+                <div class="bg-slate-900/85 border border-slate-800 rounded-2xl p-4 flex-1 flex flex-col shadow-2xl min-h-[480px]">
+                    <div class="flex-1 flex items-center justify-center bg-slate-950/90 rounded-xl border border-slate-800 p-2 overflow-hidden relative">
+                        <svg id="svg-viewlist-main" viewBox="-45 -50 495 395" class="w-full h-full max-h-[75vh]"></svg>
+                    </div>
+                </div>
+            </div>
+
         </div>
 
         <!-- ==================== 4. RIGHT SIDEBAR: INSPECTOR & ROOM/DOOR/STAIR DIRECTORY ==================== -->
-        <aside class="w-full lg:w-96 bg-slate-900 border-t lg:border-t-0 lg:border-l border-slate-800 flex flex-col shrink-0 max-h-[40vh] lg:max-h-full overflow-hidden z-20">
+        <aside id="studio-sidebar" class="w-full lg:w-96 bg-slate-900 border-t lg:border-t-0 lg:border-l border-slate-800 flex flex-col shrink-0 max-h-[40vh] lg:max-h-full overflow-hidden z-20">
             <!-- Inspector Header -->
             <div class="p-3 border-b border-slate-800 flex items-center justify-between bg-slate-900/95">
                 <div class="flex items-center gap-2">
@@ -480,6 +626,23 @@
                     P2 CUTOUT
                 </span>
             </div>
+
+            <!-- Quick Navigation Banner to Dedicated Views Screen -->
+            <a href="views.html" class="p-2.5 bg-gradient-to-r from-emerald-950/40 via-slate-900 to-teal-950/30 border-b border-emerald-500/20 hover:border-emerald-500/40 flex items-center justify-between gap-2 group transition" title="Open Dedicated Plain Views Screen (views.html)">
+                <div class="flex items-center gap-2">
+                    <span class="w-6 h-6 rounded-md bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs group-hover:scale-110 transition">
+                        <i class="fa-solid fa-table-list"></i>
+                    </span>
+                    <div>
+                        <div class="text-[11px] font-bold text-white group-hover:text-emerald-300 transition">Dedicated Views Screen</div>
+                        <div class="text-[10px] text-slate-400">9 3D &amp; 2D Architectural Views</div>
+                    </div>
+                </div>
+                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 group-hover:bg-emerald-500 text-emerald-300 group-hover:text-slate-950 border border-emerald-500/40 transition flex items-center gap-1">
+                    <span>Open</span>
+                    <i class="fa-solid fa-arrow-right text-[8px]"></i>
+                </span>
+            </a>
 
             <!-- Selected Element Details Card -->
             <div class="p-3.5 border-b border-slate-800 bg-slate-950/50 space-y-2.5 overflow-y-auto">
@@ -567,6 +730,65 @@
 
             <!-- Scrollable Directory List -->
             <div id="directory-list" class="flex-1 overflow-y-auto p-2 space-y-1"></div>
+        </aside>
+
+        <!-- ==================== 5. RIGHT SIDEBAR: ARCHITECTURAL VIEW LIST ==================== -->
+        <aside id="viewlist-sidebar" class="hidden w-full lg:w-[420px] xl:w-[450px] bg-slate-900 border-t lg:border-t-0 lg:border-l border-slate-800 flex flex-col shrink-0 max-h-[50vh] lg:max-h-full overflow-hidden z-20 shadow-2xl">
+            <!-- View List Header -->
+            <div class="p-3.5 border-b border-slate-800 bg-slate-900/98">
+                <div class="flex items-center justify-between gap-2 mb-2">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-list-check text-emerald-400"></i>
+                        <h2 class="font-bold text-sm text-white">Architectural Views List</h2>
+                    </div>
+                    <span id="vl-count-badge" class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+                        9 PRESET VIEWS
+                    </span>
+                </div>
+                <p class="text-[11px] text-slate-400 leading-snug">Click any view to display on Left. Interactive 3D Models &amp; 2D CAD Plans.</p>
+
+                <!-- Search Input -->
+                <div class="relative mt-2.5">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-500 text-xs"></i>
+                    <input type="text" id="vl-search-input" oninput="filterViewList(this.value)" placeholder="Search views (e.g., ground, roof, dusk, 2d)..." class="w-full bg-slate-950/90 border border-slate-800 focus:border-emerald-500/60 rounded-lg pl-8 pr-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none transition">
+                </div>
+
+                <!-- Filter Category Tabs -->
+                <div class="flex flex-wrap gap-1 mt-2">
+                    <button id="vl-cat-all" onclick="filterViewListByCategory('all')" class="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 transition">
+                        All (9)
+                    </button>
+                    <button id="vl-cat-3d" onclick="filterViewListByCategory('3d')" class="px-2 py-0.5 rounded text-[10px] font-medium text-slate-400 hover:text-white bg-slate-950 border border-slate-800 transition">
+                        3D Elevations
+                    </button>
+                    <button id="vl-cat-2d" onclick="filterViewListByCategory('2d')" class="px-2 py-0.5 rounded text-[10px] font-medium text-slate-400 hover:text-white bg-slate-950 border border-slate-800 transition">
+                        2D Blueprints
+                    </button>
+                    <button id="vl-cat-ground" onclick="filterViewListByCategory('ground')" class="px-2 py-0.5 rounded text-[10px] font-medium text-slate-400 hover:text-white bg-slate-950 border border-slate-800 transition">
+                        Ground Floor
+                    </button>
+                    <button id="vl-cat-first" onclick="filterViewListByCategory('first')" class="px-2 py-0.5 rounded text-[10px] font-medium text-slate-400 hover:text-white bg-slate-950 border border-slate-800 transition">
+                        First Floor
+                    </button>
+                </div>
+            </div>
+
+            <!-- Scrollable Cards Container -->
+            <div id="viewlist-cards-container" class="flex-1 overflow-y-auto p-3 space-y-2.5">
+                <!-- Cards dynamically populated by renderViewListCards() -->
+            </div>
+
+            <!-- Bottom Quick Info Footer -->
+            <div class="p-2.5 border-t border-slate-800 bg-slate-950/90 flex items-center justify-between text-[11px] text-slate-400">
+                <span class="flex items-center gap-1.5 text-emerald-400 font-medium">
+                    <i class="fa-solid fa-circle-info"></i>
+                    <span>Selected view renders on Left</span>
+                </span>
+                <button onclick="exitViewListScreen()" class="text-slate-400 hover:text-white transition flex items-center gap-1">
+                    <i class="fa-solid fa-arrow-left"></i>
+                    <span>Exit Screen</span>
+                </button>
+            </div>
         </aside>
     </div>
 
@@ -2744,7 +2966,7 @@
             path.setAttribute('stroke-width', isSelectedDoor ? '2' : '1.2');
             if (isClosed) path.setAttribute('stroke-dasharray', '3 3');
             if (doorId) {
-                path.style.cursor = 'pointer';
+                if (path.style) path.style.cursor = 'pointer';
                 path.onclick = (e) => {
                     e.stopPropagation();
                     selectElementById(doorId);
@@ -2956,6 +3178,7 @@
 
             ['day', 'golden', 'dusk'].forEach(m => {
                 const b = document.getElementById(`light-${m}`);
+                if (!b) return;
                 if (m === mode) {
                     b.className = 'px-2 py-0.5 rounded-md text-[11px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 transition';
                 } else {
@@ -2964,27 +3187,20 @@
             });
 
             if (mode === 'day') {
-                panel3d.classList.add('blueprint-grid');
-                ambientLight.color.setHex(0xe0f2fe);
-                ambientLight.intensity = 0.72;
-                sunLight.color.setHex(0xffffff);
-                sunLight.intensity = 0.92;
-                nightLightsGroup.visible = false;
+                if (panel3d) panel3d.classList.add('blueprint-grid');
+                if (typeof ambientLight !== 'undefined' && ambientLight) { ambientLight.color.setHex(0xe0f2fe); ambientLight.intensity = 0.72; }
+                if (typeof sunLight !== 'undefined' && sunLight) { sunLight.color.setHex(0xffffff); sunLight.intensity = 0.92; }
+                if (typeof nightLightsGroup !== 'undefined' && nightLightsGroup) nightLightsGroup.visible = false;
             } else if (mode === 'golden') {
-                panel3d.classList.add('golden-sky-bg');
-                ambientLight.color.setHex(0xfed7aa);
-                ambientLight.intensity = 0.52;
-                sunLight.color.setHex(0xf97316);
-                sunLight.intensity = 1.15;
-                sunLight.position.set(-24, 14, 20);
-                nightLightsGroup.visible = true;
+                if (panel3d) panel3d.classList.add('golden-sky-bg');
+                if (typeof ambientLight !== 'undefined' && ambientLight) { ambientLight.color.setHex(0xfed7aa); ambientLight.intensity = 0.52; }
+                if (typeof sunLight !== 'undefined' && sunLight) { sunLight.color.setHex(0xf97316); sunLight.intensity = 1.15; sunLight.position.set(-24, 14, 20); }
+                if (typeof nightLightsGroup !== 'undefined' && nightLightsGroup) nightLightsGroup.visible = true;
             } else if (mode === 'dusk') {
-                panel3d.classList.add('dusk-sky-bg');
-                ambientLight.color.setHex(0x1e293b);
-                ambientLight.intensity = 0.32;
-                sunLight.color.setHex(0x38bdf8);
-                sunLight.intensity = 0.22;
-                nightLightsGroup.visible = true;
+                if (panel3d) panel3d.classList.add('dusk-sky-bg');
+                if (typeof ambientLight !== 'undefined' && ambientLight) { ambientLight.color.setHex(0x1e293b); ambientLight.intensity = 0.32; }
+                if (typeof sunLight !== 'undefined' && sunLight) { sunLight.color.setHex(0x38bdf8); sunLight.intensity = 0.22; }
+                if (typeof nightLightsGroup !== 'undefined' && nightLightsGroup) nightLightsGroup.visible = true;
             }
         }
 
@@ -3354,7 +3570,7 @@
             }
         }
 
-        function setFloorFilter(filter) {
+        function setFloorFilter(filter, wallModeOverride = null) {
             currentFloorFilter = filter;
             ['both', 'roof', 'exploded', 'first', 'ground'].forEach(f => {
                 const btn = document.getElementById(`btn-floor-${f}`);
@@ -3365,40 +3581,40 @@
             });
 
             if (filter === 'both') {
-                groundFloorGroup.visible = true;
-                firstFloorGroup.visible = true;
-                roofGroup.visible = false;
-                flowGroup.visible = true;
+                if (typeof groundFloorGroup !== 'undefined' && groundFloorGroup) groundFloorGroup.visible = true;
+                if (typeof firstFloorGroup !== 'undefined' && firstFloorGroup) firstFloorGroup.visible = true;
+                if (typeof roofGroup !== 'undefined' && roofGroup) roofGroup.visible = false;
+                if (typeof flowGroup !== 'undefined' && flowGroup) flowGroup.visible = true;
                 explodeOffset = 0.0;
-                setWallHeightMode('dollhouse');
+                setWallHeightMode(wallModeOverride || 'dollhouse');
             } else if (filter === 'roof') {
-                groundFloorGroup.visible = true;
-                firstFloorGroup.visible = true;
-                roofGroup.visible = true;
-                flowGroup.visible = true;
+                if (typeof groundFloorGroup !== 'undefined' && groundFloorGroup) groundFloorGroup.visible = true;
+                if (typeof firstFloorGroup !== 'undefined' && firstFloorGroup) firstFloorGroup.visible = true;
+                if (typeof roofGroup !== 'undefined' && roofGroup) roofGroup.visible = true;
+                if (typeof flowGroup !== 'undefined' && flowGroup) flowGroup.visible = true;
                 explodeOffset = 0.0;
-                setWallHeightMode('full');
+                setWallHeightMode(wallModeOverride || 'full');
             } else if (filter === 'exploded') {
-                groundFloorGroup.visible = true;
-                firstFloorGroup.visible = true;
-                roofGroup.visible = false;
-                flowGroup.visible = true;
+                if (typeof groundFloorGroup !== 'undefined' && groundFloorGroup) groundFloorGroup.visible = true;
+                if (typeof firstFloorGroup !== 'undefined' && firstFloorGroup) firstFloorGroup.visible = true;
+                if (typeof roofGroup !== 'undefined' && roofGroup) roofGroup.visible = false;
+                if (typeof flowGroup !== 'undefined' && flowGroup) flowGroup.visible = true;
                 explodeOffset = 3.6;
-                setWallHeightMode('dollhouse');
+                setWallHeightMode(wallModeOverride || 'dollhouse');
             } else if (filter === 'first') {
-                groundFloorGroup.visible = false;
-                firstFloorGroup.visible = true;
-                roofGroup.visible = false;
-                flowGroup.visible = false;
+                if (typeof groundFloorGroup !== 'undefined' && groundFloorGroup) groundFloorGroup.visible = false;
+                if (typeof firstFloorGroup !== 'undefined' && firstFloorGroup) firstFloorGroup.visible = true;
+                if (typeof roofGroup !== 'undefined' && roofGroup) roofGroup.visible = false;
+                if (typeof flowGroup !== 'undefined' && flowGroup) flowGroup.visible = false;
                 explodeOffset = 0.0;
-                setWallHeightMode('dollhouse');
+                setWallHeightMode(wallModeOverride || 'dollhouse');
             } else if (filter === 'ground') {
-                groundFloorGroup.visible = true;
-                firstFloorGroup.visible = false;
-                roofGroup.visible = false;
-                flowGroup.visible = false;
+                if (typeof groundFloorGroup !== 'undefined' && groundFloorGroup) groundFloorGroup.visible = true;
+                if (typeof firstFloorGroup !== 'undefined' && firstFloorGroup) firstFloorGroup.visible = false;
+                if (typeof roofGroup !== 'undefined' && roofGroup) roofGroup.visible = false;
+                if (typeof flowGroup !== 'undefined' && flowGroup) flowGroup.visible = false;
                 explodeOffset = 0.0;
-                setWallHeightMode('dollhouse');
+                setWallHeightMode(wallModeOverride || 'dollhouse');
             }
             updateVerticalPositions();
         }
@@ -3416,22 +3632,25 @@
                     : 'px-2 py-0.5 rounded-md text-[11px] font-medium text-slate-400 hover:text-white transition';
             }
 
-            allWallMeshes.forEach(m => {
-                if (m.userData.isWall) {
-                    const targetH = (mode === 'dollhouse') ? 1.32 : (m.userData.fullHeight || 2.9);
-                    const baseH = m.geometry.parameters.height;
-                    m.scale.y = targetH / baseH;
-                    m.position.y = targetH / 2;
-                } else if (m.userData.isWallCap) {
-                    const targetH = (mode === 'dollhouse') ? 1.32 : (m.userData.fullHeight || 2.9);
-                    m.position.y = targetH + 0.03;
-                } else if (m.userData.isDoorLeaf) {
-                    const targetH = (mode === 'dollhouse') ? 1.28 : 2.1;
-                    const baseH = m.geometry.parameters.height;
-                    m.scale.y = targetH / baseH;
-                    m.position.y = targetH / 2 + 0.04;
-                }
-            });
+            if (typeof allWallMeshes !== 'undefined' && Array.isArray(allWallMeshes)) {
+                allWallMeshes.forEach(m => {
+                    if (!m || !m.geometry || !m.geometry.parameters) return;
+                    if (m.userData.isWall) {
+                        const targetH = (mode === 'dollhouse') ? 1.32 : (m.userData.fullHeight || 2.9);
+                        const baseH = m.geometry.parameters.height;
+                        m.scale.y = targetH / baseH;
+                        m.position.y = targetH / 2;
+                    } else if (m.userData.isWallCap) {
+                        const targetH = (mode === 'dollhouse') ? 1.32 : (m.userData.fullHeight || 2.9);
+                        m.position.y = targetH + 0.03;
+                    } else if (m.userData.isDoorLeaf) {
+                        const targetH = (mode === 'dollhouse') ? 1.28 : 2.1;
+                        const baseH = m.geometry.parameters.height;
+                        m.scale.y = targetH / baseH;
+                        m.position.y = targetH / 2 + 0.04;
+                    }
+                });
+            }
         }
 
         function set3DColorTheme(theme) {
@@ -3447,12 +3666,15 @@
                     : 'px-2 py-0.5 rounded-md text-[11px] font-medium text-slate-400 hover:text-white transition';
             }
 
-            zonePadMeshes.forEach(mesh => {
-                const el = mesh.userData.planElement;
-                if (!el) return;
-                const hex = (theme === 'realistic') ? el.color : (el.codedColor || el.color);
-                mesh.material.color.setHex(hex);
-            });
+            if (typeof zonePadMeshes !== 'undefined' && Array.isArray(zonePadMeshes)) {
+                zonePadMeshes.forEach(mesh => {
+                    if (!mesh || !mesh.userData) return;
+                    const el = mesh.userData.planElement;
+                    if (!el) return;
+                    const hex = (theme === 'realistic') ? el.color : (el.codedColor || el.color);
+                    mesh.material.color.setHex(hex);
+                });
+            }
         }
 
         function updateWallOpacity(val) {
@@ -3521,10 +3743,577 @@
             }
         }
 
+
+        /***********************************************************************
+         * ARCHITECTURAL VIEW LIST GALLERY SCREEN SYSTEM
+         * Supports both 3D Real-Time Views & 2D CAD Plans
+         * Selected View on Left, Interactive Filterable List on Right
+         ***********************************************************************/
+        const VIEW_LIST_ITEMS = [
+            {
+                id: 1,
+                number: "1",
+                type: "3d",
+                title: "3D View + Full Walls + Zone Colors + Elevation (Day & Dusk) + Full Exterior + Roof",
+                shortTitle: "3D Full Exterior + Roof Elevation",
+                badge: "Full Exterior + Roof",
+                badgeColor: "emerald",
+                category: "3d",
+                floorFilter: "roof",
+                wallMode: "full",
+                theme: "coded",
+                defaultLight: "day",
+                camera: { theta: 0.0, phi: 1.42, radius: 28.0, tx: 10, ty: 2.8, tz: 7.0 },
+                tags: ["3D View", "Full Walls (10')", "Zone Colors", "Elevation (Day & Dusk)", "Full Exterior + Roof"],
+                description: "Complete 2-story building massing with full-height walls, roof slab, glass skylight dome, and parapet walls. South front street elevation showing color-coded functional zones with Day and Dusk lighting."
+            },
+            {
+                id: 2,
+                number: "2",
+                type: "3d",
+                title: "3D View + Full Walls + Zone Colors + Elevation (Day & Dusk) — Ground Floor",
+                shortTitle: "3D Ground Floor Elevation",
+                badge: "Ground Floor",
+                badgeColor: "amber",
+                category: "ground",
+                floorFilter: "ground",
+                wallMode: "full",
+                theme: "coded",
+                defaultLight: "day",
+                camera: { theta: 0.0, phi: 1.42, radius: 24.0, tx: 10, ty: 1.3, tz: 7.0 },
+                tags: ["3D View", "Full Walls (10')", "Zone Colors", "Elevation (Day & Dusk)", "Ground Floor"],
+                description: "Ground floor isolated with 10' full walls, master bedroom suite, central dining core, drawing hall, puja room, kitchen, and bathroom. Day and Dusk elevation."
+            },
+            {
+                id: 3,
+                number: "3",
+                type: "3d",
+                title: "3D View + Full Walls + Zone Colors + Elevation (Day & Dusk) — First Floor",
+                shortTitle: "3D First Floor Elevation",
+                badge: "First Floor",
+                badgeColor: "sky",
+                category: "first",
+                floorFilter: "first",
+                wallMode: "full",
+                theme: "coded",
+                defaultLight: "day",
+                camera: { theta: 0.0, phi: 1.42, radius: 24.0, tx: 10, ty: 4.6, tz: 7.0 },
+                tags: ["3D View", "Full Walls (10')", "Zone Colors", "Elevation (Day & Dusk)", "First Floor"],
+                description: "First floor isolated with 10' full walls, P1 family lobby, central P2 double-height cutout overlooking the dining space, upper bedrooms 1 & 2, and dual balconies. Day and Dusk elevation."
+            },
+            {
+                id: 4,
+                number: "4",
+                type: "2d",
+                subType: "ground",
+                title: "2D CAD Plan — Ground Floor Dimensioned Construction Blueprint",
+                shortTitle: "2D Ground Floor CAD Plan",
+                badge: "2D Blueprint",
+                badgeColor: "amber",
+                category: "2d",
+                tags: ["2D CAD", "Ground Floor", "Dimensions (60'×42')", "Columns & Doors"],
+                description: "High-precision architectural 2D blueprint showing wall dimensions in feet & inches, column locations, room square footages, and door swings for Ground Floor."
+            },
+            {
+                id: 5,
+                number: "5",
+                type: "2d",
+                subType: "first",
+                title: "2D CAD Plan — First Floor Dimensioned Blueprint (P2 Central Void)",
+                shortTitle: "2D First Floor CAD Plan",
+                badge: "2D Blueprint",
+                badgeColor: "emerald",
+                category: "2d",
+                tags: ["2D CAD", "First Floor", "P2 Void (28'×10'9\")", "Balconies"],
+                description: "Detailed 2D blueprint featuring the 28'-0\" × 10'-9\" P2 double-height central void, upper bedrooms, and balcony dimensions."
+            },
+            {
+                id: 6,
+                number: "6",
+                type: "2d",
+                subType: "overlay",
+                title: "2D CAD Superimposed Alignment X-Ray Overlay",
+                shortTitle: "2D Superimposed X-Ray",
+                badge: "2D Overlay",
+                badgeColor: "purple",
+                category: "2d",
+                tags: ["2D Overlay", "Vertical Alignment", "P2 over Dining", "Bed 1 over Master"],
+                description: "Dual-floor stacked CAD overlay proving vertical alignment of the P2 open void directly above the ground floor dining table."
+            },
+            {
+                id: 7,
+                number: "7",
+                type: "2d",
+                subType: "section",
+                title: "2D Architectural Cross-Section Drawing (Section A–A)",
+                shortTitle: "2D Cross-Section A-A",
+                badge: "2D Section",
+                badgeColor: "rose",
+                category: "2d",
+                tags: ["2D Section", "Transverse Cut", "Ceiling 10'-6\"", "P2 Void 21'-6\""],
+                description: "Transverse vertical cross-section showing plinth level (+2'-0\"), ground ceiling (10'-6\"), double-height core (21'-6\"), and roof slab."
+            },
+            {
+                id: 8,
+                number: "8",
+                type: "3d",
+                title: "3D Exploded 2-Story Stack View (Zone Colors)",
+                shortTitle: "3D Exploded Stack View",
+                badge: "Exploded 3D",
+                badgeColor: "indigo",
+                category: "3d",
+                floorFilter: "exploded",
+                wallMode: "dollhouse",
+                theme: "coded",
+                defaultLight: "day",
+                camera: { theta: 0.65, phi: 0.96, radius: 29.0, tx: 10, ty: 2.8, tz: 7.0 },
+                tags: ["3D Exploded", "3.6m Separation", "Dual Stairs", "Spatial Flow"],
+                description: "Ground and first floors pulled apart vertically by 3.6m in 3D to reveal internal staircases (Ref 1-4) and double-height void connectivity."
+            },
+            {
+                id: 9,
+                number: "9",
+                type: "3d",
+                title: "3D Both Floors Dollhouse Cutaway (Realistic Finishes)",
+                shortTitle: "3D Dollhouse Cutaway",
+                badge: "Dollhouse 3D",
+                badgeColor: "emerald",
+                category: "3d",
+                floorFilter: "both",
+                wallMode: "dollhouse",
+                theme: "realistic",
+                defaultLight: "day",
+                camera: { theta: 0.58, phi: 0.88, radius: 26.5, tx: 10, ty: 2.0, tz: 7.0 },
+                tags: ["3D Dollhouse", "4.5' Half-Walls", "Realistic Materials", "Wood & Marble"],
+                description: "Low cutaway walls allowing immediate visual inspection of furniture layouts and room adjacencies with realistic wood and tile textures."
+            }
+        ];
+
+        let isViewListActive = false;
+        let activeViewListItemId = 1;
+        let currentViewListCategory = 'all';
+        let currentViewListSearch = '';
+
+        function enterViewListScreen(initialId = 1) {
+            isViewListActive = true;
+
+            // Show Top Banner
+            const topBanner = document.getElementById('viewlist-top-banner');
+            if (topBanner) {
+                topBanner.classList.remove('hidden');
+                topBanner.classList.add('flex');
+            }
+
+            // Update Header tab & button highlights
+            const tabVl = document.getElementById('tab-viewlist');
+            if (tabVl) {
+                tabVl.className = 'px-3 py-1 rounded-lg text-xs font-bold bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/30 transition flex items-center gap-1.5 cursor-pointer';
+            }
+            const btnGoto = document.getElementById('btn-goto-view-list');
+            if (btnGoto) {
+                btnGoto.classList.add('ring-2', 'ring-emerald-400', 'ring-offset-2', 'ring-offset-slate-950');
+            }
+
+            // Hide Studio Sidebar, Show View List Sidebar
+            const studioSide = document.getElementById('studio-sidebar');
+            if (studioSide) studioSide.classList.add('hidden');
+            const vlSide = document.getElementById('viewlist-sidebar');
+            if (vlSide) {
+                vlSide.classList.remove('hidden');
+                vlSide.classList.add('flex');
+            }
+
+            // Hide Studio Camera Bar, Show Viewlist 3D HUD
+            const studioCam = document.getElementById('studio-camera-bar');
+            if (studioCam) studioCam.classList.add('hidden');
+            const vlHud = document.getElementById('viewlist-3d-hud');
+            if (vlHud) vlHud.classList.remove('hidden');
+
+            // Select default or requested view
+            selectViewListItem(initialId || activeViewListItemId || 1);
+        }
+
+        function exitViewListScreen() {
+            isViewListActive = false;
+
+            // Hide Top Banner
+            const topBanner = document.getElementById('viewlist-top-banner');
+            if (topBanner) {
+                topBanner.classList.add('hidden');
+                topBanner.classList.remove('flex');
+            }
+
+            // Reset Header Tab / Button
+            const tabVl = document.getElementById('tab-viewlist');
+            if (tabVl) {
+                tabVl.className = 'px-3 py-1 rounded-lg text-xs font-semibold bg-emerald-600/30 hover:bg-emerald-600/40 text-emerald-300 border border-emerald-500/50 transition flex items-center gap-1.5 cursor-pointer';
+            }
+            const btnGoto = document.getElementById('btn-goto-view-list');
+            if (btnGoto) {
+                btnGoto.classList.remove('ring-2', 'ring-emerald-400', 'ring-offset-2', 'ring-offset-slate-950');
+            }
+
+            // Hide View List Sidebar, Show Studio Sidebar
+            const vlSide = document.getElementById('viewlist-sidebar');
+            if (vlSide) {
+                vlSide.classList.add('hidden');
+                vlSide.classList.remove('flex');
+            }
+            const studioSide = document.getElementById('studio-sidebar');
+            if (studioSide) studioSide.classList.remove('hidden');
+
+            // Show Studio Camera Bar, Hide Viewlist 3D HUD
+            const studioCam = document.getElementById('studio-camera-bar');
+            if (studioCam) studioCam.classList.remove('hidden');
+            const vlHud = document.getElementById('viewlist-3d-hud');
+            if (vlHud) vlHud.classList.add('hidden');
+
+            // Hide Dedicated 2D Panel
+            const vl2d = document.getElementById('panel-viewlist-2d');
+            if (vl2d) {
+                vl2d.classList.add('hidden');
+                vl2d.classList.remove('flex');
+            }
+
+            // Restore Studio 3D Mode
+            switchMainMode('3d');
+            activatePresentationSuite(1);
+            setTimeout(onWindowResize, 60);
+        }
+
+        function toggleViewListScreen() {
+            if (isViewListActive) {
+                exitViewListScreen();
+            } else {
+                enterViewListScreen();
+            }
+        }
+
+        function selectViewListItem(id, lightMode = null) {
+            activeViewListItemId = id;
+            const item = VIEW_LIST_ITEMS.find(v => v.id === id);
+            if (!item) return;
+
+            if (item.type === '3d') {
+                // Show 3D Panel on Left, hide 2D panels
+                document.getElementById('panel-3d').classList.remove('hidden');
+                document.getElementById('panel-2d').classList.add('hidden');
+                document.getElementById('panel-2d').classList.remove('flex');
+                document.getElementById('panel-section').classList.add('hidden');
+                document.getElementById('panel-section').classList.remove('flex');
+
+                const vl2d = document.getElementById('panel-viewlist-2d');
+                if (vl2d) {
+                    vl2d.classList.add('hidden');
+                    vl2d.classList.remove('flex');
+                }
+
+                // Apply Floor Filter & Wall Height
+                setFloorFilter(item.floorFilter, item.wallMode || 'full');
+
+                // Apply Color Theme ('coded' for Zone Colors)
+                set3DColorTheme(item.theme || 'coded');
+
+                // Apply Lighting Mode ('day', 'dusk', 'golden')
+                const targetLight = lightMode || item.defaultLight || currentLighting || 'day';
+                setLightingMode(targetLight);
+
+                // Apply Camera Preset Orbit
+                if (item.camera) {
+                    setOrbitPreset(item.camera.theta, item.camera.phi, item.camera.radius, item.camera.tx, item.camera.ty, item.camera.tz);
+                }
+
+                // Update HUD on 3D viewport
+                updateViewList3DHUD(item, targetLight);
+
+                setTimeout(onWindowResize, 60);
+            } else if (item.type === '2d') {
+                // Show Dedicated 2D Panel on Left, hide 3D panel
+                document.getElementById('panel-3d').classList.add('hidden');
+                document.getElementById('panel-2d').classList.add('hidden');
+                document.getElementById('panel-2d').classList.remove('flex');
+                document.getElementById('panel-section').classList.add('hidden');
+                document.getElementById('panel-section').classList.remove('flex');
+
+                const vl2d = document.getElementById('panel-viewlist-2d');
+                if (vl2d) {
+                    vl2d.classList.remove('hidden');
+                    vl2d.classList.add('flex');
+                    renderViewList2D(item);
+                }
+            }
+
+            renderViewListCards();
+            updateViewListTopBanner(item);
+        }
+
+        function renderViewList2D(item) {
+            const titleEl = document.getElementById('vl-2d-title');
+            if (titleEl) {
+                titleEl.innerHTML = `<i class="fa-solid fa-compass-drafting text-emerald-400"></i><span>${item.title}</span>`;
+            }
+            const descEl = document.getElementById('vl-2d-desc');
+            if (descEl) {
+                descEl.textContent = item.description;
+            }
+
+            // Update sub-tabs in 2D toolbar
+            ['g', 'f', 'o', 's'].forEach(k => {
+                const b = document.getElementById(`vl-2d-btn-${k}`);
+                if (!b) return;
+                const match = (k === 'g' && item.subType === 'ground') ||
+                              (k === 'f' && item.subType === 'first') ||
+                              (k === 'o' && item.subType === 'overlay') ||
+                              (k === 's' && item.subType === 'section');
+                b.className = match
+                    ? 'px-2.5 py-1 rounded text-xs font-semibold bg-emerald-600 text-white shadow transition'
+                    : 'px-2.5 py-1 rounded text-xs font-medium text-slate-300 hover:text-white transition';
+            });
+
+            const svg = document.getElementById('svg-viewlist-main');
+            if (!svg) return;
+
+            if (item.subType === 'section') {
+                svg.setAttribute('viewBox', '0 0 880 480');
+                renderCrossSectionSVG('svg-viewlist-main');
+            } else if (item.subType === 'overlay') {
+                svg.setAttribute('viewBox', '-45 -50 495 395');
+                renderOverlayFloorSVG('svg-viewlist-main');
+            } else if (item.subType === 'first') {
+                svg.setAttribute('viewBox', '-45 -50 495 395');
+                renderSingleFloorSVG('svg-viewlist-main', 'first');
+            } else {
+                svg.setAttribute('viewBox', '-45 -50 495 395');
+                renderSingleFloorSVG('svg-viewlist-main', 'ground');
+            }
+        }
+
+        function updateViewListTopBanner(item) {
+            const tEl = document.getElementById('vl-banner-title');
+            if (tEl) tEl.textContent = `${item.number}. ${item.shortTitle || item.title}`;
+            const bBadge = document.getElementById('vl-banner-type-badge');
+            if (bBadge) {
+                bBadge.textContent = item.type === '3d' ? '3D VIEW' : '2D CAD';
+                bBadge.className = item.type === '3d'
+                    ? 'px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
+                    : 'px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40';
+            }
+            const lightWrap = document.getElementById('vl-banner-lighting-wrap');
+            if (lightWrap) {
+                lightWrap.style.display = (item.type === '3d') ? 'flex' : 'none';
+            }
+            updateTopBannerLightingPills(currentLighting);
+        }
+
+        function updateViewList3DHUD(item, light) {
+            const hTitle = document.getElementById('vl-hud-title');
+            if (hTitle) hTitle.textContent = `${item.number}. ${item.shortTitle || item.title}`;
+
+            const hBadge = document.getElementById('vl-hud-badge');
+            if (hBadge) {
+                hBadge.textContent = item.badge ? item.badge.toUpperCase() : 'ELEVATION';
+            }
+
+            const hTags = document.getElementById('vl-hud-tags');
+            if (hTags && item.tags) {
+                hTags.innerHTML = item.tags.map(t =>
+                    `<span class="px-1.5 py-0.5 rounded text-[10px] font-mono bg-slate-800 text-slate-300 border border-slate-700">${t}</span>`
+                ).join('');
+            }
+
+            updateHUDLightingButtons(light);
+        }
+
+        function updateHUDLightingButtons(light) {
+            ['day', 'golden', 'dusk'].forEach(m => {
+                const b = document.getElementById(`vl-hud-light-${m}`);
+                if (!b) return;
+                if (m === light) {
+                    b.className = 'px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow transition';
+                } else {
+                    b.className = 'px-2 py-0.5 rounded text-[11px] font-medium text-slate-400 hover:text-white bg-slate-800 border border-slate-700 transition';
+                }
+            });
+        }
+
+        function updateTopBannerLightingPills(light) {
+            ['day', 'golden', 'dusk'].forEach(m => {
+                const b = document.getElementById(`vl-top-light-${m}`);
+                if (!b) return;
+                if (m === light) {
+                    b.className = 'px-2.5 py-1 rounded-md text-[11px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 transition';
+                } else {
+                    b.className = 'px-2.5 py-1 rounded-md text-[11px] font-medium text-slate-400 hover:text-white transition';
+                }
+            });
+        }
+
+        function setViewListLighting(mode) {
+            setLightingMode(mode);
+            updateHUDLightingButtons(mode);
+            updateTopBannerLightingPills(mode);
+            renderViewListCards();
+        }
+
+        function setViewListElevationAngle(angle) {
+            const item = VIEW_LIST_ITEMS.find(v => v.id === activeViewListItemId);
+            const isGround = item && (item.floorFilter === 'ground');
+            const isFirst = item && (item.floorFilter === 'first');
+            const ty = isFirst ? 4.6 : (isGround ? 1.3 : 2.8);
+            const r = (isGround || isFirst) ? 24.0 : 28.0;
+
+            if (angle === 'south') {
+                setOrbitPreset(0.0, 1.42, r, 10, ty, 7.0);
+            } else if (angle === 'east') {
+                setOrbitPreset(1.57, 1.42, r, 10, ty, 7.0);
+            } else if (angle === 'north') {
+                setOrbitPreset(3.14, 1.42, r, 10, ty, 7.0);
+            } else if (angle === 'west') {
+                setOrbitPreset(-1.57, 1.42, r, 10, ty, 7.0);
+            } else if (angle === 'iso') {
+                setOrbitPreset(0.58, 0.95, r, 10, ty, 7.0);
+            }
+        }
+
+        function filterViewList(query) {
+            currentViewListSearch = (query || '').toLowerCase().trim();
+            renderViewListCards();
+        }
+
+        function filterViewListByCategory(cat) {
+            currentViewListCategory = cat;
+            ['all', '3d', '2d', 'ground', 'first'].forEach(c => {
+                const b = document.getElementById(`vl-cat-${c}`);
+                if (!b) return;
+                if (c === cat) {
+                    b.className = 'px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 transition';
+                } else {
+                    b.className = 'px-2 py-0.5 rounded text-[10px] font-medium text-slate-400 hover:text-white bg-slate-950 border border-slate-800 transition';
+                }
+            });
+            renderViewListCards();
+        }
+
+        function renderViewListCards() {
+            const container = document.getElementById('viewlist-cards-container');
+            if (!container) return;
+            container.innerHTML = '';
+
+            const filtered = VIEW_LIST_ITEMS.filter(item => {
+                // Category match
+                let catMatch = true;
+                if (currentViewListCategory === '3d') catMatch = (item.type === '3d');
+                else if (currentViewListCategory === '2d') catMatch = (item.type === '2d');
+                else if (currentViewListCategory === 'ground') catMatch = (item.category === 'ground' || item.subType === 'ground' || item.floorFilter === 'ground');
+                else if (currentViewListCategory === 'first') catMatch = (item.category === 'first' || item.subType === 'first' || item.floorFilter === 'first');
+
+                if (!catMatch) return false;
+
+                // Search match
+                if (!currentViewListSearch) return true;
+                const haystack = `${item.number} ${item.title} ${item.description} ${(item.tags || []).join(' ')}`.toLowerCase();
+                return haystack.includes(currentViewListSearch);
+            });
+
+            const countBadge = document.getElementById('vl-count-badge');
+            if (countBadge) countBadge.textContent = `${filtered.length} OF ${VIEW_LIST_ITEMS.length} VIEWS`;
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="p-6 text-center text-slate-400 bg-slate-950/50 rounded-xl border border-slate-800">
+                        <i class="fa-solid fa-magnifying-glass text-2xl text-slate-600 mb-2 block"></i>
+                        <p class="text-xs font-semibold text-slate-300">No views found</p>
+                        <p class="text-[11px] text-slate-500 mt-1">Try another search term or switch categories.</p>
+                        <button onclick="document.getElementById('vl-search-input').value=''; filterViewList('');" class="mt-3 px-3 py-1 rounded bg-slate-800 text-xs text-slate-300 hover:text-white border border-slate-700 transition">
+                            Clear Search
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            filtered.forEach(item => {
+                const isActive = (item.id === activeViewListItemId);
+                const card = document.createElement('div');
+                card.className = isActive
+                    ? 'p-3.5 rounded-xl border-2 border-emerald-500 bg-gradient-to-br from-slate-850 to-slate-900 shadow-xl shadow-emerald-500/10 cursor-pointer transition-all transform scale-[1.01]'
+                    : 'p-3.5 rounded-xl border border-slate-800 bg-slate-950/60 hover:bg-slate-900/80 hover:border-slate-700 shadow-md cursor-pointer transition-all';
+                card.onclick = () => selectViewListItem(item.id);
+
+                // Type Badge & Number
+                const typeColor = item.type === '3d' ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30' : 'text-amber-400 bg-amber-500/10 border-amber-500/30';
+                const typeIcon = item.type === '3d' ? 'fa-cube' : (item.subType === 'section' ? 'fa-scissors' : 'fa-ruler-combined');
+
+                let lightingButtonsHtml = '';
+                if (item.type === '3d') {
+                    const isDayActive = isActive && (currentLighting === 'day');
+                    const isDuskActive = isActive && (currentLighting === 'dusk');
+
+                    lightingButtonsHtml = `
+                        <div class="flex items-center gap-1.5 mt-2.5 pt-2 border-t border-slate-800/90">
+                            <span class="text-[10px] font-mono text-slate-400">Light:</span>
+                            <button onclick="event.stopPropagation(); selectViewListItem(${item.id}, 'day')" class="px-2 py-0.5 rounded text-[11px] font-medium flex items-center gap-1 transition ${isDayActive ? 'bg-amber-500/25 text-amber-300 border border-amber-500/50 font-bold' : 'bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700'}">
+                                <i class="fa-solid fa-sun text-amber-400 text-[10px]"></i>
+                                <span>Day Elevation</span>
+                            </button>
+                            <button onclick="event.stopPropagation(); selectViewListItem(${item.id}, 'dusk')" class="px-2 py-0.5 rounded text-[11px] font-medium flex items-center gap-1 transition ${isDuskActive ? 'bg-indigo-500/25 text-indigo-300 border border-indigo-500/50 font-bold' : 'bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700'}">
+                                <i class="fa-solid fa-moon text-indigo-400 text-[10px]"></i>
+                                <span>Dusk Lights</span>
+                            </button>
+                        </div>
+                    `;
+                }
+
+                const tagsHtml = (item.tags || []).map(t =>
+                    `<span class="px-1.5 py-0.5 rounded text-[10px] font-mono bg-slate-900 text-slate-300 border border-slate-800">${t}</span>`
+                ).join('');
+
+                card.innerHTML = `
+                    <div class="flex items-center justify-between gap-2 mb-1.5">
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-6 h-6 rounded-md bg-slate-800 text-white font-mono font-bold text-xs flex items-center justify-center border border-slate-700 shrink-0">
+                                ${item.number}
+                            </span>
+                            <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold border ${typeColor} flex items-center gap-1">
+                                <i class="fa-solid ${typeIcon} text-[9px]"></i>
+                                <span>${item.type === '3d' ? '3D VIEW' : '2D CAD'}</span>
+                            </span>
+                            <span class="px-2 py-0.5 rounded text-[10px] font-mono text-slate-400 bg-slate-900 border border-slate-800 truncate max-w-[120px]">
+                                ${item.badge}
+                            </span>
+                        </div>
+                        ${isActive ? `
+                            <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/50 flex items-center gap-1 shrink-0 animate-pulse">
+                                <i class="fa-solid fa-check"></i>
+                                <span>ON LEFT</span>
+                            </span>
+                        ` : ''}
+                    </div>
+
+                    <h3 class="text-xs sm:text-sm font-bold text-white leading-snug mb-1">
+                        ${item.title}
+                    </h3>
+
+                    <p class="text-[11px] text-slate-400 leading-relaxed mb-2">
+                        ${item.description}
+                    </p>
+
+                    <div class="flex flex-wrap gap-1">
+                        ${tagsHtml}
+                    </div>
+
+                    ${lightingButtonsHtml}
+                `;
+
+                container.appendChild(card);
+            });
+        }
+
         window.onload = function () {
             init3DScene();
             renderAll2DBlueprints();
             renderDirectoryList();
+            renderViewListCards();
             selectElementById('f1_p2', false);
             animateLoop();
         };

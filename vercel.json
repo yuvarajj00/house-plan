@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "rewrites": [
+    { "source": "/views", "destination": "/views.html" },
+    { "source": "/views.html", "destination": "/views.html" },
+    { "source": "/", "destination": "/index.html" },
+    { "source": "/index", "destination": "/index.html" },
+    { "source": "/index.html", "destination": "/index.html" }
+  ]
+}
