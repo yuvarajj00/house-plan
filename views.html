@@ -331,6 +331,20 @@
                 </div>
             </div>
         </div>
+
+        <!-- Floating Reopen Buttons (Appear after closing the sidebar) -->
+        <button id="btn-open-list-sidebar" onclick="toggleViewsSidebar(true)" class="hidden absolute top-3 right-3 sm:right-64 z-30 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-emerald-500 via-emerald-400 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-slate-950 font-bold text-xs shadow-xl shadow-emerald-500/25 flex items-center gap-2 transition-all transform hover:scale-105 active:scale-95 cursor-pointer border border-emerald-300/40" title="Open Views List Sidebar">
+            <i class="fa-solid fa-list-check text-slate-950 text-sm"></i>
+            <span>Open Views List</span>
+            <span class="px-1.5 py-0.5 rounded text-[9px] font-mono font-extrabold bg-slate-950/20 text-slate-950 uppercase">9 Views</span>
+        </button>
+
+        <!-- Right-Edge Drawer Tab (Always visible on the right edge when sidebar is closed) -->
+        <button id="btn-drawer-open-sidebar" onclick="toggleViewsSidebar(true)" class="hidden absolute top-1/2 -translate-y-1/2 right-0 z-30 px-3 py-3 rounded-l-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs shadow-2xl flex items-center gap-2 border-y border-l border-emerald-400/50 transition-all transform hover:-translate-x-1 cursor-pointer group" title="Click to Open Views List Sidebar">
+            <i class="fa-solid fa-chevron-left text-xs group-hover:-translate-x-0.5 transition-transform"></i>
+            <i class="fa-solid fa-table-list text-sm"></i>
+            <span class="hidden sm:inline font-sans text-xs tracking-wide">Open Views List</span>
+        </button>
     </div>
 
     <!-- ==================== RIGHT: ARCHITECTURAL VIEWS LIST ==================== -->
@@ -350,7 +364,7 @@
                     <span id="vl-count-badge" class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
                         9 OF 9 VIEWS
                     </span>
-                    <button onclick="toggleViewsSidebar()" class="w-6 h-6 rounded flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-800 transition" title="Hide Views Sidebar">
+                    <button onclick="toggleViewsSidebar(false)" class="w-6 h-6 rounded flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-800 transition" title="Close Views Sidebar">
                         <i class="fa-solid fa-xmark text-xs"></i>
                     </button>
                 </div>
@@ -3591,11 +3605,18 @@
         }
 
         let isViewsSidebarVisible = true;
-        function toggleViewsSidebar() {
-            isViewsSidebarVisible = !isViewsSidebarVisible;
+        function toggleViewsSidebar(forceState = null) {
+            if (forceState !== null) {
+                isViewsSidebarVisible = forceState;
+            } else {
+                isViewsSidebarVisible = !isViewsSidebarVisible;
+            }
+
             const sidebar = document.getElementById('viewlist-sidebar');
             const btn = document.getElementById('btn-toggle-views-sidebar');
             const label = document.getElementById('label-toggle-sidebar');
+            const openBtn = document.getElementById('btn-open-list-sidebar');
+            const drawerBtn = document.getElementById('btn-drawer-open-sidebar');
             if (!sidebar) return;
 
             if (isViewsSidebarVisible) {
@@ -3606,6 +3627,14 @@
                     btn.classList.remove('border-slate-700', 'text-slate-400');
                 }
                 if (label) label.innerText = 'Views Sidebar';
+                if (openBtn) {
+                    openBtn.classList.add('hidden');
+                    openBtn.classList.remove('flex');
+                }
+                if (drawerBtn) {
+                    drawerBtn.classList.add('hidden');
+                    drawerBtn.classList.remove('flex');
+                }
             } else {
                 sidebar.classList.add('hidden');
                 sidebar.classList.remove('flex');
@@ -3613,7 +3642,15 @@
                     btn.classList.remove('border-emerald-500/40', 'text-emerald-300');
                     btn.classList.add('border-slate-700', 'text-slate-400');
                 }
-                if (label) label.innerText = 'Show Views List';
+                if (label) label.innerText = 'Open Views List';
+                if (openBtn) {
+                    openBtn.classList.remove('hidden');
+                    openBtn.classList.add('flex');
+                }
+                if (drawerBtn) {
+                    drawerBtn.classList.remove('hidden');
+                    drawerBtn.classList.add('flex');
+                }
             }
             setTimeout(onWindowResize, 60);
         }
