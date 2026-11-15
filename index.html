@@ -1,0 +1,2019 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Duplex House — 2D & 3D Architectural Plan Visualizer</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Three.js r128 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Inter & JetBrains Mono -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        arch: {
+                            bg: '#0b1120',
+                            panel: '#111827',
+                            border: '#1f2937',
+                            accent: '#10b981',
+                            accentSoft: 'rgba(16, 185, 129, 0.15)',
+                            blueprint: '#0f172a'
+                        }
+                    }
+                }
+            }
+        };
+    </script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+        }
+        body {
+            background-color: #0b1120;
+            color: #f3f4f6;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+        /* Blueprint CAD Grid Pattern */
+        .blueprint-grid {
+            background-color: #091326;
+            background-image: 
+                linear-gradient(rgba(56, 189, 248, 0.08) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(56, 189, 248, 0.08) 1px, transparent 1px),
+                linear-gradient(rgba(56, 189, 248, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(56, 189, 248, 0.03) 1px, transparent 1px);
+            background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;
+            background-position: -1px -1px, -1px -1px, -1px -1px, -1px -1px;
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+        /* 3D Floating Labels */
+        .label-3d {
+            position: absolute;
+            transform: translate(-50%, -50%);
+            pointer-events: auto;
+            cursor: pointer;
+            transition: transform 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
+            z-index: 10;
+            white-space: nowrap;
+        }
+        .label-3d:hover {
+            transform: translate(-50%, -58%) scale(1.08);
+            z-index: 30;
+        }
+        .label-3d.active-pin {
+            transform: translate(-50%, -60%) scale(1.12);
+            box-shadow: 0 0 0 2px #10b981, 0 8px 20px -4px rgba(16, 185, 129, 0.5);
+            z-index: 40;
+        }
+        /* 2D SVG Interactive Zones */
+        .svg-zone {
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .svg-zone:hover {
+            filter: brightness(1.22);
+        }
+        .svg-zone.selected-zone {
+            stroke: #f59e0b !important;
+            stroke-width: 3.5px !important;
+            filter: drop-shadow(0 0 10px rgba(245, 158, 11, 0.45));
+        }
+        /* Flow dashed animation */
+        @keyframes dashFlow {
+            to {
+                stroke-dashoffset: -24;
+            }
+        }
+        .flow-path {
+            stroke-dasharray: 6 6;
+            animation: dashFlow 1.2s linear infinite;
+        }
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            outline: none;
+        }
+    </style>
+</head>
+<body class="h-screen flex flex-col overflow-hidden bg-slate-950 text-slate-100">
+
+    <!-- TOP HEADER & NAVIGATION -->
+    <header class="bg-slate-900/95 backdrop-blur border-b border-slate-800 px-4 py-2.5 flex flex-wrap items-center justify-between gap-3 z-30 shrink-0">
+        <!-- Brand & Title -->
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-emerald-500/15 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shadow-inner">
+                <i class="fa-solid fa-cubes-stacked text-lg"></i>
+            </div>
+            <div>
+                <div class="flex items-center gap-2">
+                    <h1 class="font-bold text-base sm:text-lg tracking-tight text-white">Duplex Architectural Plan Visualizer</h1>
+                    <span class="hidden sm:inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-mono font-medium bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+                        G + 1 DUPLEX
+                    </span>
+                </div>
+                <p class="text-xs text-slate-400">Interactive 3D Double-Height Model &bull; 2D CAD Blueprint &bull; P1/P2 Cutout &amp; Dual Staircase Flow</p>
+            </div>
+        </div>
+
+        <!-- Primary View Mode Switcher -->
+        <div class="flex items-center bg-slate-950 p-1 rounded-xl border border-slate-800">
+            <button id="tab-3d" onclick="switchMainMode('3d')" class="flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all bg-emerald-600 text-white shadow">
+                <i class="fa-solid fa-cube"></i>
+                <span>3D Interactive Model</span>
+            </button>
+            <button id="tab-2d" onclick="switchMainMode('2d')" class="flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all text-slate-400 hover:text-white">
+                <i class="fa-solid fa-Compass-drafting"></i>
+                <span>2D Blueprint &amp; Overlay</span>
+            </button>
+            <button id="tab-split" onclick="switchMainMode('split')" class="hidden lg:flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all text-slate-400 hover:text-white">
+                <i class="fa-solid fa-columns"></i>
+                <span>Split 3D + 2D</span>
+            </button>
+        </div>
+
+        <!-- Quick Camera / Preset Actions -->
+        <div class="hidden xl:flex items-center gap-2">
+            <button onclick="focusP2Cutout()" class="px-3 py-1.5 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-300 text-xs font-medium flex items-center gap-1.5 transition">
+                <i class="fa-solid fa-eye"></i>
+                <span>Look Down P2 Void</span>
+            </button>
+            <button onclick="focusStairConnections()" class="px-3 py-1.5 rounded-lg bg-sky-500/15 hover:bg-sky-500/25 border border-sky-500/30 text-sky-300 text-xs font-medium flex items-center gap-1.5 transition">
+                <i class="fa-solid fa-stairs"></i>
+                <span>Inspect Ref 1–4 Stairs</span>
+            </button>
+            <button onclick="resetCameraView()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs font-medium flex items-center gap-1.5 transition">
+                <i class="fa-solid fa-rotate-left"></i>
+                <span>Reset View</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- SECONDARY CONTROL BAR (Floor Selector, Explode Slider, Opacity, Toggles) -->
+    <div class="bg-slate-900/70 border-b border-slate-800/80 px-4 py-2 flex flex-wrap items-center justify-between gap-3 text-xs z-20 shrink-0">
+        <!-- Floor Visibility Buttons -->
+        <div class="flex flex-wrap items-center gap-1.5">
+            <span class="text-slate-400 font-medium mr-1"><i class="fa-solid fa-layer-group mr-1 text-emerald-400"></i>Floor Level:</span>
+            <button id="btn-floor-both" onclick="setFloorFilter('both')" class="px-2.5 py-1 rounded-md font-medium bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 transition">
+                Both Stacked
+            </button>
+            <button id="btn-floor-exploded" onclick="setFloorFilter('exploded')" class="px-2.5 py-1 rounded-md font-medium bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700 transition">
+                Exploded View
+            </button>
+            <button id="btn-floor-first" onclick="setFloorFilter('first')" class="px-2.5 py-1 rounded-md font-medium bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700 transition">
+                1st Floor Only (Top Diagram)
+            </button>
+            <button id="btn-floor-ground" onclick="setFloorFilter('ground')" class="px-2.5 py-1 rounded-md font-medium bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700 transition">
+                Ground Floor Only (Bottom Diagram)
+            </button>
+        </div>
+
+        <!-- Sliders & Visual Toggles -->
+        <div class="flex flex-wrap items-center gap-4">
+            <!-- Explode Gap Slider -->
+            <div class="flex items-center gap-2">
+                <label for="explode-slider" class="text-slate-400 whitespace-nowrap">Floor Separation:</label>
+                <input id="explode-slider" type="range" min="0" max="6" step="0.1" value="0.8" oninput="updateExplodeDistance(this.value)" class="w-24 accent-emerald-500 cursor-pointer">
+            </div>
+
+            <!-- Wall Opacity Slider -->
+            <div class="flex items-center gap-2">
+                <label for="opacity-slider" class="text-slate-400 whitespace-nowrap">Wall Opacity:</label>
+                <input id="opacity-slider" type="range" min="0.15" max="1" step="0.05" value="0.82" oninput="updateWallOpacity(this.value)" class="w-20 accent-emerald-500 cursor-pointer">
+            </div>
+
+            <!-- Checkboxes for Pins & Circulation -->
+            <div class="flex items-center gap-3 border-l border-slate-800 pl-3">
+                <label class="flex items-center gap-1.5 cursor-pointer text-slate-300 hover:text-white">
+                    <input type="checkbox" id="toggle-labels" checked onchange="togglePinLabels(this.checked)" class="rounded accent-emerald-500">
+                    <span>Room &amp; Door Tags</span>
+                </label>
+                <label class="flex items-center gap-1.5 cursor-pointer text-slate-300 hover:text-white">
+                    <input type="checkbox" id="toggle-flow" checked onchange="toggleFlowArrows(this.checked)" class="rounded accent-emerald-500">
+                    <span>Stair &amp; Door Flow</span>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN WORKSPACE AREA (Viewports + Right Inspector Sidebar) -->
+    <div class="flex-1 flex flex-col lg:flex-row overflow-hidden relative">
+
+        <!-- CENTER VIEWPORT CONTAINER (Holds 3D Canvas & 2D Blueprint Panel) -->
+        <div id="viewport-wrapper" class="flex-1 flex flex-col lg:flex-row overflow-hidden relative">
+
+            <!-- 3D INTERACTIVE VIEWPORT -->
+            <div id="panel-3d" class="relative flex-1 h-full overflow-hidden blueprint-grid">
+                <div id="canvas-container" class="w-full h-full relative"></div>
+                <!-- Floating HTML Pins Container -->
+                <div id="labels-container" class="absolute inset-0 pointer-events-none overflow-hidden"></div>
+
+                <!-- 3D HUD Legend (Top Left) -->
+                <div class="absolute top-3 left-3 bg-slate-900/90 backdrop-blur-md border border-slate-800 rounded-xl p-3 max-w-xs pointer-events-auto shadow-xl">
+                    <div class="flex items-center justify-between mb-1.5">
+                        <span class="text-[11px] font-mono uppercase tracking-wider text-emerald-400 font-semibold">3D Spatial Legend</span>
+                        <span class="text-[10px] text-slate-400">Drag: Orbit &bull; Scroll: Zoom</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-x-3 gap-y-1 text-[11px] text-slate-300">
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-2.5 h-2.5 rounded-sm bg-emerald-400 inline-block"></span>
+                            <span>Bedrooms (3)</span>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-2.5 h-2.5 rounded-sm bg-cyan-400 inline-block"></span>
+                            <span>Bathrooms (4)</span>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-2.5 h-2.5 rounded-sm bg-amber-400 inline-block"></span>
+                            <span>P2 Cutout / Dining</span>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-2.5 h-2.5 rounded-sm bg-purple-400 inline-block"></span>
+                            <span>Ref 1-2 &amp; 3-4 Stairs</span>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-2.5 h-2.5 rounded-sm bg-lime-400 inline-block"></span>
+                            <span>Balconies (4)</span>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-2.5 h-2.5 rounded-sm bg-rose-400 inline-block"></span>
+                            <span>Kitchen &amp; God Rm</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- P2 Cutout Sightline Banner (Bottom Left) -->
+                <div class="absolute bottom-3 left-3 right-3 sm:right-auto bg-slate-900/90 backdrop-blur-md border border-slate-800 rounded-xl px-3.5 py-2.5 flex flex-wrap items-center gap-2.5 pointer-events-auto shadow-xl">
+                    <button onclick="focusP2Cutout()" class="px-2.5 py-1 rounded-lg bg-amber-500/20 border border-amber-500/40 text-amber-300 text-xs font-medium hover:bg-amber-500/30 transition">
+                        <i class="fa-solid fa-arrows-up-down mr-1"></i>P2 Double-Height Cutout
+                    </button>
+                    <button onclick="selectElementById('stairs_ref1')" class="px-2.5 py-1 rounded-lg bg-purple-500/20 border border-purple-500/40 text-purple-300 text-xs font-medium hover:bg-purple-500/30 transition">
+                        <i class="fa-solid fa-stairs mr-1"></i>Ref 1 &rarr; Ref 2 (Internal Duplex)
+                    </button>
+                    <button onclick="selectElementById('stairs_ref3')" class="px-2.5 py-1 rounded-lg bg-sky-500/20 border border-sky-500/40 text-sky-300 text-xs font-medium hover:bg-sky-500/30 transition">
+                        <i class="fa-solid fa-person-walking-arrow-right mr-1"></i>Ref 3 &rarr; Ref 4 (External Balcony)
+                    </button>
+                </div>
+            </div>
+
+            <!-- 2D BLUEPRINT & OVERLAY VIEWPORT -->
+            <div id="panel-2d" class="hidden flex-1 h-full overflow-y-auto blueprint-grid p-4 flex-col gap-4 border-l border-slate-800">
+                <!-- 2D Blueprint Sub-toolbar -->
+                <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-3 flex flex-wrap items-center justify-between gap-3 shrink-0">
+                    <div>
+                        <h2 class="text-sm font-semibold text-white flex items-center gap-2">
+                            <i class="fa-solid fa-ruler-combined text-emerald-400"></i>
+                            <span>2D Architectural Blueprints (Exact Layout Alignment)</span>
+                        </h2>
+                        <p class="text-xs text-slate-400">Click any room, door (`f1 d1`–`f1 d5`), or staircase (`Ref 1–4`) to inspect vertical alignment and connections.</p>
+                    </div>
+                    <div class="flex items-center gap-2 bg-slate-950 p-1 rounded-lg border border-slate-800">
+                        <button id="btn-2d-side" onclick="set2DLayoutMode('side')" class="px-3 py-1 rounded-md text-xs font-medium bg-emerald-600 text-white transition">
+                            Side-by-Side (First &amp; Ground)
+                        </button>
+                        <button id="btn-2d-overlay" onclick="set2DLayoutMode('overlay')" class="px-3 py-1 rounded-md text-xs font-medium text-slate-400 hover:text-white transition">
+                            Vertical Alignment X-Ray Overlay
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 2D SVG Container (Side-by-Side Mode) -->
+                <div id="blueprint-side-container" class="grid grid-cols-1 xl:grid-cols-2 gap-4 flex-1 min-h-[460px]">
+                    <!-- First Floor Card (Matches Top Image of PDF) -->
+                    <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 flex flex-col shadow-lg">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="flex items-center gap-2">
+                                <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-mono text-xs font-semibold border border-emerald-500/30">FIRST FLOOR (UPPER LEVEL)</span>
+                                <span class="text-xs text-slate-400">Matches Top Diagram</span>
+                            </div>
+                            <span class="text-[11px] font-mono text-slate-400">Doors: f1 d1 – f1 d5</span>
+                        </div>
+                        <div class="flex-1 flex items-center justify-center bg-slate-950/70 rounded-xl border border-slate-800/80 p-2 overflow-hidden">
+                            <svg id="svg-first-floor" viewBox="-20 -35 450 355" class="w-full h-full max-h-[440px]"></svg>
+                        </div>
+                    </div>
+
+                    <!-- Ground Floor Card (Matches Bottom Image of PDF) -->
+                    <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 flex flex-col shadow-lg">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="flex items-center gap-2">
+                                <span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-mono text-xs font-semibold border border-amber-500/30">GROUND FLOOR (LOWER LEVEL)</span>
+                                <span class="text-xs text-slate-400">Matches Bottom Diagram</span>
+                            </div>
+                            <span class="text-[11px] font-mono text-slate-400">Main &amp; 2nd Entry Gates</span>
+                        </div>
+                        <div class="flex-1 flex items-center justify-center bg-slate-950/70 rounded-xl border border-slate-800/80 p-2 overflow-hidden">
+                            <svg id="svg-ground-floor" viewBox="-20 -35 450 355" class="w-full h-full max-h-[440px]"></svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2D SVG Container (Vertical X-Ray Overlay Mode) -->
+                <div id="blueprint-overlay-container" class="hidden bg-slate-900/80 border border-slate-800 rounded-2xl p-4 flex-1 flex-col shadow-lg">
+                    <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                        <div>
+                            <span class="px-2.5 py-0.5 rounded bg-purple-500/20 text-purple-300 font-mono text-xs font-semibold border border-purple-500/30">SUPERIMPOSED VERTICAL ALIGNMENT X-RAY</span>
+                            <span class="text-xs text-slate-400 ml-2">Dashed Green = 1st Floor Overlaid Directly Above Solid Ground Floor</span>
+                        </div>
+                        <div class="flex items-center gap-3 text-xs">
+                            <span class="flex items-center gap-1.5 text-amber-300"><i class="fa-solid fa-square-full text-[9px]"></i> Ground Floor Base</span>
+                            <span class="flex items-center gap-1.5 text-emerald-300"><i class="fa-regular fa-square text-[9px]"></i> First Floor Overlay</span>
+                        </div>
+                    </div>
+                    <div class="flex-1 flex items-center justify-center bg-slate-950/80 rounded-xl border border-slate-800 p-3">
+                        <svg id="svg-overlay-floor" viewBox="-20 -35 450 355" class="w-full h-full max-h-[540px]"></svg>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- RIGHT SIDEBAR: ARCHITECTURAL INSPECTOR & DOOR/STAIR DIRECTORY -->
+        <aside class="w-full lg:w-96 bg-slate-900 border-t lg:border-t-0 lg:border-l border-slate-800 flex flex-col shrink-0 max-h-[42vh] lg:max-h-full overflow-hidden z-20">
+            <!-- Inspector Header -->
+            <div class="p-3.5 border-b border-slate-800 flex items-center justify-between bg-slate-900/95">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-magnifying-glass-location text-emerald-400"></i>
+                    <h2 class="font-semibold text-sm text-white">Room, Door &amp; Stair Inspector</h2>
+                </div>
+                <span id="inspector-badge" class="px-2 py-0.5 rounded text-[11px] font-mono bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+                    P2 CUTOUT
+                </span>
+            </div>
+
+            <!-- Selected Element Details Card -->
+            <div class="p-4 border-b border-slate-800 bg-slate-950/50 space-y-3 overflow-y-auto">
+                <div>
+                    <div class="flex items-center justify-between">
+                        <h3 id="insp-title" class="text-base font-bold text-white">P2 — Open Double-Height Cutout</h3>
+                        <span id="insp-floor" class="text-xs font-mono text-amber-400">First Floor &rarr; Ground</span>
+                    </div>
+                    <p id="insp-subtitle" class="text-xs text-emerald-400 font-medium mt-0.5">"Open place full empty from this space we can see the ground floor"</p>
+                </div>
+
+                <p id="insp-desc" class="text-xs text-slate-300 leading-relaxed">
+                    Positioned in the center of the First Floor roaming gallery (P1), this open structural void looks directly down onto the Ground Floor Dining Table &amp; Things, creating visual and acoustic connection between both levels.
+                </p>
+
+                <!-- Key Metrics & Connections -->
+                <div class="grid grid-cols-2 gap-2 pt-1">
+                    <div class="bg-slate-900 border border-slate-800 rounded-lg p-2">
+                        <span class="text-[10px] font-mono uppercase text-slate-400 block">Plan Dimensions</span>
+                        <input id="insp-dim-input" type="text" value="28 ft × 11 ft Void" onchange="saveCustomField('dim', this.value)" class="w-full bg-transparent text-xs font-semibold text-white focus:outline-none focus:text-emerald-400 mt-0.5" title="Click to customize dimension">
+                    </div>
+                    <div class="bg-slate-900 border border-slate-800 rounded-lg p-2">
+                        <span class="text-[10px] font-mono uppercase text-slate-400 block">Vertical Stack</span>
+                        <span id="insp-stack" class="text-xs font-semibold text-slate-200 mt-0.5 block truncate">Above Dining Table</span>
+                    </div>
+                </div>
+
+                <!-- Connected Doors / Adjacencies -->
+                <div>
+                    <span class="text-[10px] font-mono uppercase text-slate-400 block mb-1">Direct Connections &amp; Access</span>
+                    <div id="insp-connections" class="flex flex-wrap gap-1.5"></div>
+                </div>
+
+                <!-- Editable Architectural Notes -->
+                <div>
+                    <label for="insp-notes-input" class="text-[10px] font-mono uppercase text-slate-400 block mb-1">Custom Architect Notes (Editable)</label>
+                    <input id="insp-notes-input" type="text" placeholder="Add custom note for this space..." oninput="saveCustomField('note', this.value)" class="w-full bg-slate-900 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-emerald-500">
+                </div>
+            </div>
+
+            <!-- Interactive Directory Tabs (Doors f1 d1-d5, Stairs Ref 1-4, All Rooms) -->
+            <div class="flex border-b border-slate-800 bg-slate-900 text-xs font-medium shrink-0">
+                <button id="dir-tab-all" onclick="filterDirectory('all')" class="flex-1 py-2 text-center border-b-2 border-emerald-500 text-emerald-400">
+                    All Zones (18)
+                </button>
+                <button id="dir-tab-doors" onclick="filterDirectory('doors')" class="flex-1 py-2 text-center border-b-2 border-transparent text-slate-400 hover:text-slate-200">
+                    Doors (f1 d1–d5)
+                </button>
+                <button id="dir-tab-stairs" onclick="filterDirectory('stairs')" class="flex-1 py-2 text-center border-b-2 border-transparent text-slate-400 hover:text-slate-200">
+                    Stairs (Ref 1–4)
+                </button>
+            </div>
+
+            <!-- Scrollable Directory List -->
+            <div id="directory-list" class="flex-1 overflow-y-auto p-2.5 space-y-1.5"></div>
+        </aside>
+    </div>
+
+    <script>
+        /***********************************************************************
+         * 1. ARCHITECTURAL DATA MODEL (EXACT COORDINATES MATCHING MASTER.PDF)
+         * Coordinate System:
+         * X: 0 (Left Wall) to 20 (Right Wall)
+         * Z: 0 (Top Wall) to 14 (Bottom Wall)
+         *    Private Top Balconies: Z from -1.8 to 0
+         *    External Ref 3 Stairs: Z from 14.0 to 15.6
+         ***********************************************************************/
+        const PLAN_ELEMENTS = [
+            // ================= FIRST FLOOR ZONES (TOP DIAGRAM) =================
+            {
+                id: 'f1_bed1',
+                name: 'Bed Room 1',
+                shortTag: 'Bed Room 1',
+                floor: 'first',
+                category: 'room',
+                planLabel: 'Bed Room 1 (Top-Left Suite)',
+                x: 0, z: 0, w: 8.6, d: 5.2,
+                color: 0x10b981,
+                svgFill: 'rgba(16, 185, 129, 0.25)',
+                svgStroke: '#10b981',
+                dim: '28 ft × 17 ft',
+                stackInfo: 'Directly above Master Bedroom',
+                description: 'Spacious upper-level primary bedroom occupying the top-left corner. Features an internal attached bathroom on the left wall, private balcony access via door f1 d5, and entry from P1 gallery via door f1 d1.',
+                connections: ['f1_bath1', 'f1_balc_bed1', 'door_f1d1', 'door_f1d5', 'g_master']
+            },
+            {
+                id: 'f1_bath1',
+                name: 'Attached Bathroom (Bed Room 1)',
+                shortTag: 'Bath 1',
+                floor: 'first',
+                category: 'bath',
+                planLabel: 'attached bathroom for bed room1',
+                x: 0.4, z: 0.6, w: 2.0, d: 3.4,
+                color: 0x06b6d4,
+                svgFill: 'rgba(6, 182, 212, 0.30)',
+                svgStroke: '#22d3ee',
+                dim: '6.5 ft × 11 ft',
+                stackInfo: 'Above Master Bedroom (Left)',
+                description: 'En-suite bathroom enclosed inside the left side of Bed Room 1, matching the rounded rectangular callout in the first-floor plan.',
+                connections: ['f1_bed1']
+            },
+            {
+                id: 'f1_balc_bed1',
+                name: 'Particular Balcony for Bedroom 1',
+                shortTag: 'Balcony (Bed 1)',
+                floor: 'first',
+                category: 'balcony',
+                planLabel: 'particular balcony for bedroom1',
+                x: 1.4, z: -1.8, w: 6.2, d: 1.8,
+                color: 0x84cc16,
+                svgFill: 'rgba(132, 204, 22, 0.24)',
+                svgStroke: '#a3e635',
+                dim: '20 ft × 6 ft',
+                stackInfo: 'Cantilevered North/Top Projection',
+                description: 'Dedicated private balcony exclusively for Bed Room 1, accessed through door f1 d5 on the top wall.',
+                connections: ['door_f1d5', 'f1_bed1']
+            },
+            {
+                id: 'f1_bed2',
+                name: 'Bed Room 2',
+                shortTag: 'Bed Room 2',
+                floor: 'first',
+                category: 'room',
+                planLabel: 'Bed Room 2 (Top-Right Suite)',
+                x: 8.6, z: 0, w: 8.6, d: 5.2,
+                color: 0x10b981,
+                svgFill: 'rgba(16, 185, 129, 0.25)',
+                svgStroke: '#10b981',
+                dim: '28 ft × 17 ft',
+                stackInfo: 'Above Master Bath & Central Hall',
+                description: 'Second upper-level bedroom suite adjacent to Bed Room 1. Includes an internal attached bathroom along its right wall, private balcony access via f1 d4, and main entry from P1 via f1 d2.',
+                connections: ['f1_bath2', 'f1_balc_bed2', 'door_f1d2', 'door_f1d4', 'f1_p1']
+            },
+            {
+                id: 'f1_bath2',
+                name: 'Attached Bathroom (Bed Room 2)',
+                shortTag: 'Bath 2',
+                floor: 'first',
+                category: 'bath',
+                planLabel: 'attached bathroom for bed room2',
+                x: 14.8, z: 0.6, w: 2.0, d: 3.4,
+                color: 0x06b6d4,
+                svgFill: 'rgba(6, 182, 212, 0.30)',
+                svgStroke: '#22d3ee',
+                dim: '6.5 ft × 11 ft',
+                stackInfo: 'Above Upper Hall Zone',
+                description: 'En-suite bathroom positioned along the interior right wall of Bed Room 2.',
+                connections: ['f1_bed2']
+            },
+            {
+                id: 'f1_balc_bed2',
+                name: 'Particular Balcony for Bedroom 2',
+                shortTag: 'Balcony (Bed 2)',
+                floor: 'first',
+                category: 'balcony',
+                planLabel: 'particular balcony for bedroom2',
+                x: 9.6, z: -1.8, w: 6.2, d: 1.8,
+                color: 0x84cc16,
+                svgFill: 'rgba(132, 204, 22, 0.24)',
+                svgStroke: '#a3e635',
+                dim: '20 ft × 6 ft',
+                stackInfo: 'Cantilevered North/Top Projection',
+                description: 'Dedicated private balcony exclusively serving Bed Room 2, connected via door f1 d4.',
+                connections: ['door_f1d4', 'f1_bed2']
+            },
+            {
+                id: 'f1_p1',
+                name: 'P1 — Space to Roam (Upper Walkway)',
+                shortTag: 'P1 Roaming Space',
+                floor: 'first',
+                category: 'room',
+                planLabel: 'P1 is space to roam / place to roam',
+                x: 0, z: 5.2, w: 17.2, d: 6.4,
+                color: 0x64748b,
+                svgFill: 'rgba(148, 163, 184, 0.14)',
+                svgStroke: '#94a3b8',
+                dim: '56 ft × 21 ft Gallery',
+                stackInfo: 'Surrounds P2 Void above Living Hall',
+                description: 'Open upper-floor circulation gallery ("P1 is space to roam") wrapping around the central P2 cutout. Connects internal duplex stairs (Ref 2), Bedroom 1 (f1 d1), Bedroom 2 (f1 d2), and the outer balcony door (f1 d3).',
+                connections: ['f1_p2', 'stairs_ref2', 'door_f1d1', 'door_f1d2', 'door_f1d3']
+            },
+            {
+                id: 'f1_p2',
+                name: 'P2 — Open Double-Height Cutout',
+                shortTag: 'P2 Open Void',
+                floor: 'first',
+                category: 'void',
+                planLabel: 'P2: Open place full empty from this space we can see the ground floor',
+                x: 4.0, z: 6.6, w: 9.4, d: 3.6,
+                color: 0xf59e0b,
+                svgFill: 'rgba(245, 158, 11, 0.22)',
+                svgStroke: '#fbbf24',
+                dim: '30 ft × 12 ft Cutout',
+                stackInfo: 'Looks straight down to Dining Table',
+                description: 'Double-height architectural void in the heart of P1. Completely open slab with safety railing allowing direct sightlines down to the Ground Floor Dining Table & Things.',
+                connections: ['f1_p1', 'g_dining']
+            },
+            {
+                id: 'stairs_ref2',
+                name: 'Reference 2 — Internal Duplex Stairs Landing',
+                shortTag: 'Ref 2 (Duplex Up)',
+                floor: 'first',
+                category: 'stairs',
+                planLabel: 'reference 2 connected with reference 1: Steps to first floor duplex style goes inside',
+                x: 0, z: 6.4, w: 2.8, d: 2.6,
+                color: 0xa855f7,
+                svgFill: 'rgba(168, 85, 247, 0.32)',
+                svgStroke: '#c084fc',
+                dim: '9 ft × 8.5 ft Stair Well',
+                stackInfo: 'Connected directly to Reference 1 below',
+                description: 'Upper arrival landing of the indoor duplex staircase on the middle-left wall, stepping directly into the P1 roaming walkway.',
+                connections: ['stairs_ref1', 'f1_p1']
+            },
+            {
+                id: 'f1_balc_side1',
+                name: '1st Floor Balcony Side 1 (Front Terrace)',
+                shortTag: '1st Fl Balcony Side 1',
+                floor: 'first',
+                category: 'balcony',
+                planLabel: '1st floor balcony side 1',
+                x: 0, z: 11.6, w: 17.2, d: 2.4,
+                color: 0x84cc16,
+                svgFill: 'rgba(132, 204, 22, 0.22)',
+                svgStroke: '#84cc16',
+                dim: '56 ft × 8 ft',
+                stackInfo: 'Above Kitchen, God Room & Main Entry',
+                description: 'Full-width front balcony along the bottom edge of the First Floor. Receives the external staircase at Ref 4 on the left and connects to P1 via door f1 d3 on the right.',
+                connections: ['stairs_ref4', 'door_f1d3', 'f1_balc_side2']
+            },
+            {
+                id: 'stairs_ref4',
+                name: 'Ref 4 — External Balcony Stairs Landing',
+                shortTag: 'Ref 4 (Ext Stairs)',
+                floor: 'first',
+                category: 'stairs',
+                planLabel: 'ref 4 connected to ref 3: Steps outside to 1st floor that goes to balcony',
+                x: 0.2, z: 11.9, w: 4.2, d: 1.9,
+                color: 0x38bdf8,
+                svgFill: 'rgba(56, 189, 248, 0.32)',
+                svgStroke: '#38bdf8',
+                dim: '13.5 ft × 6 ft Landing',
+                stackInfo: 'Connected to Ref 3 External Steps',
+                description: 'Upper landing of the outdoor staircase located at the bottom-left corner of 1st Floor Balcony Side 1, allowing direct exterior access to the upper level.',
+                connections: ['stairs_ref3', 'f1_balc_side1']
+            },
+            {
+                id: 'f1_balc_side2',
+                name: '1st Floor Balcony Side 2 (Right Terrace)',
+                shortTag: '1st Fl Balcony Side 2',
+                floor: 'first',
+                category: 'balcony',
+                planLabel: '1st floor balcony side 2',
+                x: 17.2, z: 0, w: 2.8, d: 14.0,
+                color: 0x84cc16,
+                svgFill: 'rgba(132, 204, 22, 0.22)',
+                svgStroke: '#84cc16',
+                dim: '9 ft × 46 ft',
+                stackInfo: 'Directly above Right Corridor & Common Bath',
+                description: 'Long vertical balcony running along the entire right side of the first floor, joining seamlessly with 1st Floor Balcony Side 1 to form an L-shaped wrap-around terrace.',
+                connections: ['f1_balc_side1', 'g_common_bath']
+            },
+
+            // ================= FIRST FLOOR DOORS (f1 d1 to f1 d5) =================
+            {
+                id: 'door_f1d1',
+                name: 'Door f1 d1 (Bed Room 1 ↔ P1)',
+                shortTag: 'f1 d1',
+                floor: 'first',
+                category: 'doors',
+                planLabel: 'f1 d1 - entry/exit to outside space for bedroom 1',
+                x: 6.4, z: 5.05, w: 1.5, d: 0.35,
+                color: 0x34d399,
+                svgFill: '#10b981',
+                svgStroke: '#ecfdf5',
+                dim: '3.5 ft Single Leaf Door',
+                stackInfo: 'First Floor Interior Door',
+                description: 'Primary entry/exit door connecting Bed Room 1 to the P1 interior roaming gallery.',
+                connections: ['f1_bed1', 'f1_p1']
+            },
+            {
+                id: 'door_f1d2',
+                name: 'Door f1 d2 (Bed Room 2 ↔ P1)',
+                shortTag: 'f1 d2',
+                floor: 'first',
+                category: 'doors',
+                planLabel: 'f1 d2 - entry & exit to outside space for bedroom 2',
+                x: 10.4, z: 5.05, w: 1.5, d: 0.35,
+                color: 0x34d399,
+                svgFill: '#10b981',
+                svgStroke: '#ecfdf5',
+                dim: '3.5 ft Single Leaf Door',
+                stackInfo: 'First Floor Interior Door',
+                description: 'Primary entry/exit door connecting Bed Room 2 to the P1 interior roaming gallery.',
+                connections: ['f1_bed2', 'f1_p1']
+            },
+            {
+                id: 'door_f1d3',
+                name: 'Door f1 d3 (P1 ↔ 1st Floor Balcony)',
+                shortTag: 'f1 d3',
+                floor: 'first',
+                category: 'doors',
+                planLabel: 'f1 d3 - entry exit to outspace to balcony',
+                x: 14.4, z: 11.42, w: 1.6, d: 0.35,
+                color: 0xa3e635,
+                svgFill: '#84cc16',
+                svgStroke: '#ecfccb',
+                dim: '4 ft Terrace Door',
+                stackInfo: 'First Floor Balcony Access',
+                description: 'Connects the P1 interior roaming space directly out to the L-shaped 1st Floor Balcony (Side 1 & Side 2).',
+                connections: ['f1_p1', 'f1_balc_side1', 'f1_balc_side2']
+            },
+            {
+                id: 'door_f1d4',
+                name: 'Door f1 d4 (Bed Room 2 ↔ Private Balcony)',
+                shortTag: 'f1 d4',
+                floor: 'first',
+                category: 'doors',
+                planLabel: 'f1 d4 - entry & exit to bedroom 2 to balcony',
+                x: 11.6, z: -0.18, w: 1.5, d: 0.35,
+                color: 0xa3e635,
+                svgFill: '#84cc16',
+                svgStroke: '#ecfccb',
+                dim: '3.5 ft Balcony Door',
+                stackInfo: 'North Wall of Bed Room 2',
+                description: 'Dedicated balcony door opening from Bed Room 2 onto Particular Balcony for Bedroom 2.',
+                connections: ['f1_bed2', 'f1_balc_bed2']
+            },
+            {
+                id: 'door_f1d5',
+                name: 'Door f1 d5 (Bed Room 1 ↔ Private Balcony)',
+                shortTag: 'f1 d5',
+                floor: 'first',
+                category: 'doors',
+                planLabel: 'f1 d5 - entry & exit to bedroom 1 to balcony',
+                x: 4.8, z: -0.18, w: 1.5, d: 0.35,
+                color: 0xa3e635,
+                svgFill: '#84cc16',
+                svgStroke: '#ecfccb',
+                dim: '3.5 ft Balcony Door',
+                stackInfo: 'North Wall of Bed Room 1',
+                description: 'Dedicated balcony door opening from Bed Room 1 onto Particular Balcony for Bedroom 1.',
+                connections: ['f1_bed1', 'f1_balc_bed1']
+            },
+
+            // ================= GROUND FLOOR ZONES (BOTTOM DIAGRAM) =================
+            {
+                id: 'g_master',
+                name: 'Master Bedroom (Ground Floor)',
+                shortTag: 'Master Bedroom',
+                floor: 'ground',
+                category: 'room',
+                planLabel: 'Master Bedroom',
+                x: 0, z: 0, w: 11.2, d: 5.2,
+                color: 0x059669,
+                svgFill: 'rgba(16, 185, 129, 0.24)',
+                svgStroke: '#10b981',
+                dim: '36 ft × 17 ft Suite',
+                stackInfo: 'Directly below Bed Room 1 & part of Bed Room 2',
+                description: 'Expansive ground-floor Master Suite occupying the top-left section of the house, complete with a large internal attached bathroom along its right edge.',
+                connections: ['g_master_bath', 'stairs_ref1', 'g_dining']
+            },
+            {
+                id: 'g_master_bath',
+                name: 'Attached Bathroom with Master Bedroom',
+                shortTag: 'Master Bath',
+                floor: 'ground',
+                category: 'bath',
+                planLabel: 'Attached bathroom with master bedroom',
+                x: 8.4, z: 0.4, w: 2.5, d: 4.4,
+                color: 0x0891b2,
+                svgFill: 'rgba(6, 182, 212, 0.30)',
+                svgStroke: '#22d3ee',
+                dim: '8 ft × 14.5 ft',
+                stackInfo: 'Inside Right Edge of Master Bedroom',
+                description: 'Private attached bathroom located inside the right portion of the Master Bedroom.',
+                connections: ['g_master']
+            },
+            {
+                id: 'stairs_ref1',
+                name: 'Reference 1 — Internal Duplex Stairs (Up)',
+                shortTag: 'Ref 1 (Duplex Base)',
+                floor: 'ground',
+                category: 'stairs',
+                planLabel: 'reference 1: Steps to first floor duplex style goes inside',
+                x: 0, z: 5.5, w: 3.4, d: 1.8,
+                color: 0xa855f7,
+                svgFill: 'rgba(168, 85, 247, 0.30)',
+                svgStroke: '#c084fc',
+                dim: '11 ft × 6 ft Stair Base',
+                stackInfo: 'Ascends directly to Reference 2 in P1',
+                description: 'Indoor duplex staircase positioned along the middle-left wall between the Master Bedroom and the Open Kitchen. Ascends directly to Reference 2 on the First Floor.',
+                connections: ['stairs_ref2', 'g_dining', 'g_kitchen']
+            },
+            {
+                id: 'g_dining',
+                name: 'Dining Table & Things (Central Hall)',
+                shortTag: 'Dining Table & Things',
+                floor: 'ground',
+                category: 'void',
+                planLabel: 'Dining table & things (Under P2 Cutout)',
+                x: 5.0, z: 6.4, w: 5.0, d: 2.8,
+                color: 0xf59e0b,
+                svgFill: 'rgba(245, 158, 11, 0.25)',
+                svgStroke: '#fbbf24',
+                dim: '16 ft × 9 ft Dining Zone',
+                stackInfo: 'Directly underneath P2 Double-Height Void',
+                description: 'Heart of the ground-floor living and dining space. Placed directly below the First Floor P2 cutout so natural light and sightlines flow between both floors.',
+                connections: ['f1_p2', 'g_kitchen', 'g_main_entry', 'g_master']
+            },
+            {
+                id: 'g_kitchen',
+                name: 'Open Kitchen (L-Shaped)',
+                shortTag: 'Open Kitchen',
+                floor: 'ground',
+                category: 'room',
+                planLabel: 'Open Kitchen (Vertical + Horizontal L-Shape)',
+                x: 0, z: 8.2, w: 6.8, d: 5.8,
+                color: 0xf43f5e,
+                svgFill: 'rgba(244, 63, 94, 0.24)',
+                svgStroke: '#fb7185',
+                dim: '22 ft × 19 ft L-Counter',
+                stackInfo: 'Bottom-Left Corner under P1 & Balcony Side 1',
+                description: 'L-shaped Open Kitchen comprising two connected counter zones along the bottom-left and bottom walls, opening directly toward the central Dining Table.',
+                connections: ['g_dining', 'g_god_room', 'stairs_ref1']
+            },
+            {
+                id: 'g_god_room',
+                name: 'Small God Room (Pooja Space)',
+                shortTag: 'Small God Room',
+                floor: 'ground',
+                category: 'room',
+                planLabel: 'Small God Room',
+                x: 7.8, z: 11.6, w: 1.8, d: 2.4,
+                color: 0xf97316,
+                svgFill: 'rgba(249, 115, 22, 0.28)',
+                svgStroke: '#fb923c',
+                dim: '6 ft × 8 ft Sanctuary',
+                stackInfo: 'Bottom Wall between Kitchen & Main Entry',
+                description: 'Dedicated Pooja / Small God Room along the front/bottom wall between the Open Kitchen and the Main Entry Gate.',
+                connections: ['g_kitchen', 'g_main_entry', 'g_dining']
+            },
+            {
+                id: 'g_main_entry',
+                name: 'Main Entry Gate',
+                shortTag: 'Main Entry Gate',
+                floor: 'ground',
+                category: 'doors',
+                planLabel: 'Main entry gate',
+                x: 11.2, z: 13.65, w: 2.4, d: 0.45,
+                color: 0x34d399,
+                svgFill: '#10b981',
+                svgStroke: '#ecfdf5',
+                dim: '8 ft Main Entrance',
+                stackInfo: 'South / Bottom Perimeter Wall',
+                description: 'Primary entrance gate at the bottom wall leading directly into the central living and dining hall.',
+                connections: ['g_dining', 'g_god_room', 'g_second_entry']
+            },
+            {
+                id: 'g_common_bath',
+                name: 'Common Bathroom (Top-Right)',
+                shortTag: 'Common Bathroom',
+                floor: 'ground',
+                category: 'bath',
+                planLabel: 'Common Bathroom',
+                x: 17.2, z: 0, w: 2.8, d: 4.5,
+                color: 0x06b6d4,
+                svgFill: 'rgba(6, 182, 212, 0.28)',
+                svgStroke: '#22d3ee',
+                dim: '9 ft × 14.5 ft',
+                stackInfo: 'Under 1st Floor Balcony Side 2 (Top)',
+                description: 'Shared ground-floor bathroom situated at the top end of the right-side vertical corridor zone.',
+                connections: ['g_second_entry', 'f1_balc_side2']
+            },
+            {
+                id: 'g_second_entry',
+                name: 'Second Entry Gate (Right Corridor)',
+                shortTag: 'Second Entry Gate',
+                floor: 'ground',
+                category: 'doors',
+                planLabel: 'second entry gate',
+                x: 17.0, z: 8.6, w: 0.4, d: 2.2,
+                color: 0x34d399,
+                svgFill: '#10b981',
+                svgStroke: '#ecfdf5',
+                dim: '7 ft Side Corridor Gate',
+                stackInfo: 'Inner Wall of Right Side Corridor',
+                description: 'Secondary entrance gate positioned along the right-hand side utility corridor, connecting the main hall to the right passage and Common Bathroom.',
+                connections: ['g_common_bath', 'g_main_entry', 'g_dining']
+            },
+            {
+                id: 'stairs_ref3',
+                name: 'Ref 3 — External Stairs to 1st Floor Balcony',
+                shortTag: 'Ref 3 (Ext Base)',
+                floor: 'ground',
+                category: 'stairs',
+                planLabel: 'ref 3: Steps outside to 1st floor that goes to balcony',
+                x: 0, z: 14.2, w: 5.8, d: 1.5,
+                color: 0x38bdf8,
+                svgFill: 'rgba(56, 189, 248, 0.30)',
+                svgStroke: '#38bdf8',
+                dim: '19 ft × 5 ft Exterior Flight',
+                stackInfo: 'Ascends outside to Ref 4 on 1st Fl Balcony',
+                description: 'Exterior staircase located outside the bottom-left wall below the Open Kitchen, ascending directly to Ref 4 on 1st Floor Balcony Side 1.',
+                connections: ['stairs_ref4', 'f1_balc_side1']
+            }
+        ];
+
+        // Global State
+        let currentMainMode = '3d';      // '3d' | '2d' | 'split'
+        let currentFloorFilter = 'both'; // 'both' | 'exploded' | 'first' | 'ground'
+        let currentDirFilter = 'all';    // 'all' | 'doors' | 'stairs'
+        let selectedElementId = 'f1_p2';
+        let explodeOffset = 0.8;         // Extra vertical separation between Ground & First floor
+        let wallOpacity = 0.82;
+        let showPinLabels = true;
+        let showFlowLines = true;
+        const customUserEdits = {};      // Stores custom user dimensions or notes
+
+        /***********************************************************************
+         * 2. THREE.JS 3D SCENE SETUP & ARCHITECTURAL MODEL BUILDER
+         ***********************************************************************/
+        let scene, camera, renderer;
+        let groundFloorGroup, firstFloorGroup, flowGroup;
+        const interactiveMeshes = [];
+        const meshById = {};
+        const pinDomById = {};
+
+        // Custom Spherical Orbit & Pan State
+        const camState = {
+            theta: 0.58,          // Horizontal angle
+            phi: 0.92,            // Vertical angle from top
+            radius: 26.5,         // Distance
+            target: new THREE.Vector3(10, 2.2, 7.0),
+            targetDest: new THREE.Vector3(10, 2.2, 7.0),
+            thetaDest: 0.58,
+            phiDest: 0.92,
+            radiusDest: 26.5,
+            isDragging: false,
+            isPanning: false,
+            prevX: 0,
+            prevY: 0
+        };
+
+        const raycaster = new THREE.Raycaster();
+        const mouseVec = new THREE.Vector2();
+
+        function init3DScene() {
+            const container = document.getElementById('canvas-container');
+            const w = container.clientWidth || 800;
+            const h = container.clientHeight || 600;
+
+            scene = new THREE.Scene();
+
+            camera = new THREE.PerspectiveCamera(42, w / h, 0.1, 200);
+            updateCameraTransform(true);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(w, h);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            container.appendChild(renderer.domElement);
+
+            // Lighting
+            const ambientLight = new THREE.AmbientLight(0xdbeafe, 0.68);
+            scene.add(ambientLight);
+
+            const dirLight = new THREE.DirectionalLight(0xffffff, 0.85);
+            dirLight.position.set(22, 34, 24);
+            dirLight.castShadow = true;
+            dirLight.shadow.mapSize.width = 2048;
+            dirLight.shadow.mapSize.height = 2048;
+            scene.add(dirLight);
+
+            const fillLight = new THREE.DirectionalLight(0x38bdf8, 0.35);
+            fillLight.position.set(-15, 18, -12);
+            scene.add(fillLight);
+
+            // Base Architectural Grid
+            const gridHelper = new THREE.GridHelper(36, 36, 0x1e293b, 0x0f172a);
+            gridHelper.position.set(10, -0.15, 7);
+            scene.add(gridHelper);
+
+            // Build Floor Groups
+            groundFloorGroup = new THREE.Group();
+            firstFloorGroup = new THREE.Group();
+            flowGroup = new THREE.Group();
+            scene.add(groundFloorGroup);
+            scene.add(firstFloorGroup);
+            scene.add(flowGroup);
+
+            buildGroundFloor3D();
+            buildFirstFloor3D();
+            buildStaircasesAndFlow3D();
+            createFloating3DPins();
+
+            // Mouse & Touch Event Listeners for Camera & Raycasting
+            const dom = renderer.domElement;
+            let pointerDownPos = { x: 0, y: 0 };
+
+            dom.addEventListener('mousedown', (e) => {
+                camState.isDragging = true;
+                camState.isPanning = (e.button === 2 || e.shiftKey);
+                camState.prevX = e.clientX;
+                camState.prevY = e.clientY;
+                pointerDownPos = { x: e.clientX, y: e.clientY };
+            });
+
+            window.addEventListener('mousemove', (e) => {
+                if (!camState.isDragging) return;
+                const dx = e.clientX - camState.prevX;
+                const dy = e.clientY - camState.prevY;
+                camState.prevX = e.clientX;
+                camState.prevY = e.clientY;
+
+                if (camState.isPanning) {
+                    const panSpeed = 0.025;
+                    const right = new THREE.Vector3();
+                    camera.getWorldDirection(right);
+                    right.cross(camera.up).normalize();
+                    camState.targetDest.addScaledVector(right, -dx * panSpeed);
+                    camState.targetDest.z -= dy * panSpeed;
+                } else {
+                    camState.thetaDest -= dx * 0.007;
+                    camState.phiDest = Math.max(0.15, Math.min(1.48, camState.phiDest - dy * 0.007));
+                }
+            });
+
+            window.addEventListener('mouseup', (e) => {
+                if (!camState.isDragging) return;
+                camState.isDragging = false;
+                const dist = Math.hypot(e.clientX - pointerDownPos.x, e.clientY - pointerDownPos.y);
+                if (dist < 5) {
+                    handleCanvasClick(e);
+                }
+            });
+
+            dom.addEventListener('contextmenu', (e) => e.preventDefault());
+
+            dom.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                camState.radiusDest = Math.max(10, Math.min(48, camState.radiusDest + e.deltaY * 0.018));
+            }, { passive: false });
+
+            // Touch Support
+            dom.addEventListener('touchstart', (e) => {
+                if (e.touches.length === 1) {
+                    camState.isDragging = true;
+                    camState.prevX = e.touches[0].clientX;
+                    camState.prevY = e.touches[0].clientY;
+                    pointerDownPos = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+                }
+            }, { passive: true });
+
+            dom.addEventListener('touchmove', (e) => {
+                if (!camState.isDragging || e.touches.length !== 1) return;
+                const dx = e.touches[0].clientX - camState.prevX;
+                const dy = e.touches[0].clientY - camState.prevY;
+                camState.prevX = e.touches[0].clientX;
+                camState.prevY = e.touches[0].clientY;
+                camState.thetaDest -= dx * 0.007;
+                camState.phiDest = Math.max(0.15, Math.min(1.48, camState.phiDest - dy * 0.007));
+            }, { passive: true });
+
+            dom.addEventListener('touchend', () => {
+                camState.isDragging = false;
+            });
+
+            window.addEventListener('resize', onWindowResize);
+        }
+
+        // Helper to create selectable zone pads & walls
+        function createInteractivePad(el, group, yOffset = 0.06, height = 0.12) {
+            let geom;
+            // Special L-shape handling for Open Kitchen
+            if (el.id === 'g_kitchen') {
+                const shape = new THREE.Shape();
+                // Local shape from (0, 8.2)
+                shape.moveTo(0, 0);
+                shape.lineTo(2.8, 0);
+                shape.lineTo(2.8, 3.6);
+                shape.lineTo(6.8, 3.6);
+                shape.lineTo(6.8, 5.8);
+                shape.lineTo(0, 5.8);
+                shape.closePath();
+                geom = new THREE.ExtrudeGeometry(shape, { depth: height, bevelEnabled: false });
+                geom.rotateX(Math.PI / 2);
+                const mat = new THREE.MeshStandardMaterial({
+                    color: el.color,
+                    transparent: true,
+                    opacity: 0.45,
+                    roughness: 0.4
+                });
+                const mesh = new THREE.Mesh(geom, mat);
+                mesh.position.set(el.x, yOffset + height, el.z);
+                mesh.userData = { elementId: el.id, baseColor: el.color };
+                group.add(mesh);
+                interactiveMeshes.push(mesh);
+                meshById[el.id] = mesh;
+                return mesh;
+            }
+
+            geom = new THREE.BoxGeometry(el.w - 0.08, height, el.d - 0.08);
+            const mat = new THREE.MeshStandardMaterial({
+                color: el.color,
+                transparent: true,
+                opacity: el.category === 'void' ? 0.25 : 0.45,
+                roughness: 0.4,
+                metalness: 0.1
+            });
+            const mesh = new THREE.Mesh(geom, mat);
+            mesh.position.set(el.x + el.w / 2, yOffset + height / 2, el.z + el.d / 2);
+            mesh.userData = { elementId: el.id, baseColor: el.color };
+            group.add(mesh);
+            interactiveMeshes.push(mesh);
+            meshById[el.id] = mesh;
+            return mesh;
+        }
+
+        // Helper to create architectural walls
+        const allWallMeshes = [];
+        function addWallSegment(group, x1, z1, x2, z2, height = 2.6, thickness = 0.18, color = 0x334155) {
+            const len = Math.hypot(x2 - x1, z2 - z1);
+            const geom = new THREE.BoxGeometry(len, height, thickness);
+            const mat = new THREE.MeshStandardMaterial({
+                color: color,
+                transparent: true,
+                opacity: wallOpacity,
+                roughness: 0.55
+            });
+            const wall = new THREE.Mesh(geom, mat);
+            wall.position.set((x1 + x2) / 2, height / 2, (z1 + z2) / 2);
+            wall.rotation.y = -Math.atan2(z2 - z1, x2 - x1);
+            wall.castShadow = true;
+            wall.receiveShadow = true;
+            group.add(wall);
+            allWallMeshes.push(wall);
+
+            // Subtle green architectural top cap matching the user's green border plan
+            const capGeom = new THREE.BoxGeometry(len, 0.06, thickness + 0.04);
+            const capMat = new THREE.MeshBasicMaterial({ color: 0x22c55e });
+            const cap = new THREE.Mesh(capGeom, capMat);
+            cap.position.y = height / 2 + 0.03;
+            wall.add(cap);
+            return wall;
+        }
+
+        function buildGroundFloor3D() {
+            // Base Ground Slab (20 x 14)
+            const slabGeom = new THREE.BoxGeometry(20, 0.2, 14);
+            const slabMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.8 });
+            const slab = new THREE.Mesh(slabGeom, slabMat);
+            slab.position.set(10, -0.1, 7);
+            slab.receiveShadow = true;
+            groundFloorGroup.add(slab);
+
+            // Right-side Corridor Slab Strip (Darker tint matching black border on diagram)
+            const corrGeom = new THREE.BoxGeometry(2.8, 0.04, 14);
+            const corrMat = new THREE.MeshStandardMaterial({ color: 0x0f172a });
+            const corr = new THREE.Mesh(corrGeom, corrMat);
+            corr.position.set(18.6, 0.02, 7);
+            groundFloorGroup.add(corr);
+
+            // Create interactive floor zones for all Ground Floor elements
+            PLAN_ELEMENTS.filter(e => e.floor === 'ground').forEach(el => {
+                if (el.category === 'doors') {
+                    // Build Door Frame
+                    createInteractivePad(el, groundFloorGroup, 0.05, 2.1);
+                } else {
+                    createInteractivePad(el, groundFloorGroup, 0.02, 0.1);
+                }
+            });
+
+            // Ground Floor Walls
+            // Outer perimeter walls (with openings for Main Entry Gate & Second Entry Gate)
+            addWallSegment(groundFloorGroup, 0, 0, 20, 0, 2.6);       // Top Wall
+            addWallSegment(groundFloorGroup, 0, 0, 0, 14, 2.6);       // Left Wall
+            addWallSegment(groundFloorGroup, 20, 0, 20, 14, 2.6);     // Right Wall
+            addWallSegment(groundFloorGroup, 0, 14, 11.2, 14, 2.6);   // Bottom Wall (left of Main Entry)
+            addWallSegment(groundFloorGroup, 13.6, 14, 20, 14, 2.6);  // Bottom Wall (right of Main Entry)
+
+            // Master Bedroom & Master Bath Walls
+            addWallSegment(groundFloorGroup, 0, 5.2, 7.0, 5.2, 2.5);
+            addWallSegment(groundFloorGroup, 8.2, 5.2, 11.2, 5.2, 2.5);
+            addWallSegment(groundFloorGroup, 11.2, 0, 11.2, 5.2, 2.5);
+            addWallSegment(groundFloorGroup, 8.4, 0.4, 8.4, 4.8, 2.4);
+
+            // Right Corridor & Common Bathroom Partition Wall (with Second Entry Gate opening)
+            addWallSegment(groundFloorGroup, 17.2, 0, 17.2, 8.6, 2.5);
+            addWallSegment(groundFloorGroup, 17.2, 10.8, 17.2, 14, 2.5);
+            addWallSegment(groundFloorGroup, 17.2, 4.5, 20.0, 4.5, 2.5);
+
+            // Small God Room Walls
+            addWallSegment(groundFloorGroup, 7.8, 11.6, 7.8, 14, 2.3);
+            addWallSegment(groundFloorGroup, 9.6, 11.6, 9.6, 14, 2.3);
+
+            // 3D Furniture Details on Ground Floor:
+            // 1. Dining Table & 6 Chairs directly under P2 Cutout!
+            const diningGroup = new THREE.Group();
+            const tableTop = new THREE.Mesh(
+                new THREE.BoxGeometry(3.2, 0.12, 1.6),
+                new THREE.MeshStandardMaterial({ color: 0xfbbf24, roughness: 0.3 })
+            );
+            tableTop.position.set(7.5, 0.85, 7.8);
+            diningGroup.add(tableTop);
+
+            // 6 Dining Chairs around the table
+            const chairOffsets = [
+                [-1.0, -1.05], [0, -1.05], [1.0, -1.05],
+                [-1.0, 1.05],  [0, 1.05],  [1.0, 1.05]
+            ];
+            chairOffsets.forEach(([cx, cz]) => {
+                const chair = new THREE.Mesh(
+                    new THREE.BoxGeometry(0.45, 0.5, 0.45),
+                    new THREE.MeshStandardMaterial({ color: 0xfde68a })
+                );
+                chair.position.set(7.5 + cx, 0.35, 7.8 + cz);
+                diningGroup.add(chair);
+            });
+            groundFloorGroup.add(diningGroup);
+
+            // 2. Master Bed
+            const masterBed = new THREE.Mesh(
+                new THREE.BoxGeometry(2.4, 0.55, 2.1),
+                new THREE.MeshStandardMaterial({ color: 0x34d399 })
+            );
+            masterBed.position.set(3.2, 0.35, 2.2);
+            groundFloorGroup.add(masterBed);
+
+            // 3. L-Shaped Kitchen Counters
+            const counter1 = new THREE.Mesh(
+                new THREE.BoxGeometry(1.1, 0.9, 5.2),
+                new THREE.MeshStandardMaterial({ color: 0xfb7185 })
+            );
+            counter1.position.set(0.65, 0.5, 11.0);
+            groundFloorGroup.add(counter1);
+
+            const counter2 = new THREE.Mesh(
+                new THREE.BoxGeometry(3.8, 0.9, 1.1),
+                new THREE.MeshStandardMaterial({ color: 0xfb7185 })
+            );
+            counter2.position.set(4.5, 0.5, 13.3);
+            groundFloorGroup.add(counter2);
+        }
+
+        function buildFirstFloor3D() {
+            // Position First Floor at Y = 3.2 + explodeOffset
+            firstFloorGroup.position.y = 3.2 + explodeOffset;
+
+            // Build First Floor Slab WITH THE EXACT P2 CUTOUT HOLE (x: 4.0..13.4, z: 6.6..10.2)
+            // Using 4 slab rectangles around the P2 hole + top balconies so the P2 hole is 100% open!
+            const slabMat = new THREE.MeshStandardMaterial({
+                color: 0x1e293b,
+                roughness: 0.75,
+                transparent: true,
+                opacity: 0.92
+            });
+
+            // Slab Piece A: Top Half (Bedrooms 1 & 2 + P1 North strip + Side 2 top, Z: 0 to 6.6)
+            const slabTop = new THREE.Mesh(new THREE.BoxGeometry(20, 0.22, 6.6), slabMat);
+            slabTop.position.set(10, -0.11, 3.3);
+            firstFloorGroup.add(slabTop);
+
+            // Slab Piece B: Bottom Half (P1 South strip + Balcony Side 1 + Side 2 bottom, Z: 10.2 to 14.0)
+            const slabBot = new THREE.Mesh(new THREE.BoxGeometry(20, 0.22, 3.8), slabMat);
+            slabBot.position.set(10, -0.11, 12.1);
+            firstFloorGroup.add(slabBot);
+
+            // Slab Piece C: Left of P2 Cutout (X: 0 to 4.0, Z: 6.6 to 10.2)
+            const slabLeft = new THREE.Mesh(new THREE.BoxGeometry(4.0, 0.22, 3.6), slabMat);
+            slabLeft.position.set(2.0, -0.11, 8.4);
+            firstFloorGroup.add(slabLeft);
+
+            // Slab Piece D: Right of P2 Cutout (X: 13.4 to 20.0, Z: 6.6 to 10.2)
+            const slabRight = new THREE.Mesh(new THREE.BoxGeometry(6.6, 0.22, 3.6), slabMat);
+            slabRight.position.set(16.7, -0.11, 8.4);
+            firstFloorGroup.add(slabRight);
+
+            // Cantilevered Slabs for Private Balconies 1 & 2 (Z: -1.8 to 0)
+            const balc1Slab = new THREE.Mesh(new THREE.BoxGeometry(6.2, 0.2, 1.8), slabMat);
+            balc1Slab.position.set(4.5, -0.1, -0.9);
+            firstFloorGroup.add(balc1Slab);
+
+            const balc2Slab = new THREE.Mesh(new THREE.BoxGeometry(6.2, 0.2, 1.8), slabMat);
+            balc2Slab.position.set(12.7, -0.1, -0.9);
+            firstFloorGroup.add(balc2Slab);
+
+            // Interactive Floor Zones on First Floor
+            PLAN_ELEMENTS.filter(e => e.floor === 'first').forEach(el => {
+                if (el.id === 'f1_p2') {
+                    // For P2 Void, create a glowing amber glass rim frame so you can click it AND see right through it!
+                    const frameGeom = new THREE.BoxGeometry(el.w, 0.85, el.d);
+                    const frameMat = new THREE.MeshStandardMaterial({
+                        color: 0xf59e0b,
+                        transparent: true,
+                        opacity: 0.22,
+                        wireframe: false
+                    });
+                    const voidMesh = new THREE.Mesh(frameGeom, frameMat);
+                    voidMesh.position.set(el.x + el.w / 2, 0.42, el.z + el.d / 2);
+                    voidMesh.userData = { elementId: el.id, baseColor: el.color };
+                    firstFloorGroup.add(voidMesh);
+                    interactiveMeshes.push(voidMesh);
+                    meshById[el.id] = voidMesh;
+
+                    // Safety Glass Railing Border around P2 Cutout
+                    const railEdges = new THREE.EdgesGeometry(frameGeom);
+                    const railLine = new THREE.LineSegments(
+                        railEdges,
+                        new THREE.LineBasicMaterial({ color: 0xfbbf24 })
+                    );
+                    voidMesh.add(railLine);
+                } else if (el.category === 'doors') {
+                    createInteractivePad(el, firstFloorGroup, 0.05, 2.1);
+                } else {
+                    createInteractivePad(el, firstFloorGroup, 0.02, 0.08);
+                }
+            });
+
+            // First Floor Walls (Bed Room 1, Bed Room 2, Bathrooms, Balcony Dividers)
+            // Top walls of Bedrooms (with gaps for f1 d5 and f1 d4)
+            addWallSegment(firstFloorGroup, 0, 0, 4.7, 0, 2.5);
+            addWallSegment(firstFloorGroup, 6.3, 0, 11.5, 0, 2.5);
+            addWallSegment(firstFloorGroup, 13.1, 0, 17.2, 0, 2.5);
+
+            // Center wall between Bed Room 1 & Bed Room 2
+            addWallSegment(firstFloorGroup, 8.6, 0, 8.6, 5.2, 2.5);
+
+            // Left wall of Bed Room 1 & P1
+            addWallSegment(firstFloorGroup, 0, 0, 0, 11.6, 2.5);
+
+            // Right wall of Bed Room 2 & P1 (separating from 1st Floor Balcony Side 2)
+            addWallSegment(firstFloorGroup, 17.2, 0, 17.2, 11.6, 2.5);
+
+            // Bottom wall of Bed Room 1 & 2 (with gaps for f1 d1 and f1 d2)
+            addWallSegment(firstFloorGroup, 0, 5.2, 6.3, 5.2, 2.5);
+            addWallSegment(firstFloorGroup, 7.9, 5.2, 10.3, 5.2, 2.5);
+            addWallSegment(firstFloorGroup, 11.9, 5.2, 17.2, 5.2, 2.5);
+
+            // Attached Bathroom 1 & 2 Enclosures
+            addWallSegment(firstFloorGroup, 2.4, 0.6, 2.4, 4.0, 2.3);
+            addWallSegment(firstFloorGroup, 0.4, 4.0, 2.4, 4.0, 2.3);
+            addWallSegment(firstFloorGroup, 14.8, 0.6, 14.8, 4.0, 2.3);
+            addWallSegment(firstFloorGroup, 14.8, 4.0, 16.8, 4.0, 2.3);
+
+            // Wall between P1 Roaming Space and 1st Floor Balcony Side 1 (with gap for f1 d3)
+            addWallSegment(firstFloorGroup, 0, 11.6, 14.3, 11.6, 2.4);
+            addWallSegment(firstFloorGroup, 16.0, 11.6, 17.2, 11.6, 2.4);
+
+            // Low Balcony Railings (Side 1, Side 2, and Private Bedroom Balconies)
+            addWallSegment(firstFloorGroup, 0, 14.0, 20.0, 14.0, 1.0, 0.12, 0x10b981);
+            addWallSegment(firstFloorGroup, 20.0, 0, 20.0, 14.0, 1.0, 0.12, 0x10b981);
+            addWallSegment(firstFloorGroup, 1.4, -1.8, 7.6, -1.8, 1.0, 0.12, 0x10b981);
+            addWallSegment(firstFloorGroup, 9.6, -1.8, 15.8, -1.8, 1.0, 0.12, 0x10b981);
+
+            // 3D Beds in Bed Room 1 & Bed Room 2
+            const bed1 = new THREE.Mesh(
+                new THREE.BoxGeometry(2.1, 0.5, 1.9),
+                new THREE.MeshStandardMaterial({ color: 0x34d399 })
+            );
+            bed1.position.set(4.5, 0.3, 2.2);
+            firstFloorGroup.add(bed1);
+
+            const bed2 = new THREE.Mesh(
+                new THREE.BoxGeometry(2.1, 0.5, 1.9),
+                new THREE.MeshStandardMaterial({ color: 0x34d399 })
+            );
+            bed2.position.set(11.8, 0.3, 2.2);
+            firstFloorGroup.add(bed2);
+        }
+
+        // Build 3D Stair Steps & Vertical Sightline Connectors
+        let internalStairSteps = [];
+        let externalStairSteps = [];
+        let p2SightLines = [];
+
+        function buildStaircasesAndFlow3D() {
+            const numSteps = 10;
+
+            // 1. Internal Duplex Staircase (Ref 1 -> Ref 2)
+            for (let i = 0; i < numSteps; i++) {
+                const stepMesh = new THREE.Mesh(
+                    new THREE.BoxGeometry(2.2, 0.16, 0.32),
+                    new THREE.MeshStandardMaterial({ color: 0xc084fc, roughness: 0.3 })
+                );
+                flowGroup.add(stepMesh);
+                internalStairSteps.push(stepMesh);
+            }
+
+            // 2. External Balcony Staircase (Ref 3 -> Ref 4)
+            for (let i = 0; i < numSteps; i++) {
+                const stepMesh = new THREE.Mesh(
+                    new THREE.BoxGeometry(0.42, 0.16, 1.4),
+                    new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.3 })
+                );
+                flowGroup.add(stepMesh);
+                externalStairSteps.push(stepMesh);
+            }
+
+            // 3. Four Vertical Golden Sightline Pillars connecting P2 Cutout corners down to Dining Table
+            const corners = [
+                [4.2, 6.8], [13.2, 6.8], [4.2, 10.0], [13.2, 10.0]
+            ];
+            corners.forEach(([cx, cz]) => {
+                const geom = new THREE.CylinderGeometry(0.04, 0.04, 1, 8);
+                const mat = new THREE.MeshBasicMaterial({
+                    color: 0xfbbf24,
+                    transparent: true,
+                    opacity: 0.55
+                });
+                const cyl = new THREE.Mesh(geom, mat);
+                cyl.position.set(cx, 1.6, cz);
+                flowGroup.add(cyl);
+                p2SightLines.push(cyl);
+            });
+
+            updateStairAndFlowPositions();
+        }
+
+        function updateStairAndFlowPositions() {
+            const topY = 3.2 + explodeOffset;
+            const n = internalStairSteps.length;
+
+            // Position Ref 1 -> Ref 2 steps smoothly between Ground (Y=0.2) and First Floor (Y=topY)
+            internalStairSteps.forEach((step, idx) => {
+                const t = (idx + 0.5) / n;
+                step.position.set(1.4, t * topY, 5.8 + t * 2.2);
+            });
+
+            // Position Ref 3 -> Ref 4 steps smoothly from outside bottom-left up to 1st Floor Balcony Side 1
+            externalStairSteps.forEach((step, idx) => {
+                const t = (idx + 0.5) / n;
+                step.position.set(5.2 - t * 3.8, t * topY, 14.8 - t * 1.8);
+            });
+
+            // Scale P2 golden vertical sightline beams
+            p2SightLines.forEach(cyl => {
+                cyl.scale.set(1, topY, 1);
+                cyl.position.y = topY / 2;
+            });
+        }
+
+        /***********************************************************************
+         * 3. FLOATING 3D PINS & RAYCASTING SELECTION
+         ***********************************************************************/
+        function createFloating3DPins() {
+            const container = document.getElementById('labels-container');
+            container.innerHTML = '';
+
+            PLAN_ELEMENTS.forEach(el => {
+                const pin = document.createElement('div');
+                pin.className = 'label-3d px-2 py-0.5 rounded-md text-[10px] font-mono font-semibold border shadow-md flex items-center gap-1';
+
+                // Color styling by type
+                if (el.category === 'doors') {
+                    pin.className += ' bg-emerald-950/90 text-emerald-300 border-emerald-400/60';
+                    pin.innerHTML = `<i class="fa-solid fa-door-open text-[9px]"></i><span>${el.shortTag}</span>`;
+                } else if (el.category === 'stairs') {
+                    pin.className += ' bg-purple-950/90 text-purple-200 border-purple-400/60';
+                    pin.innerHTML = `<i class="fa-solid fa-stairs text-[9px]"></i><span>${el.shortTag}</span>`;
+                } else if (el.category === 'void') {
+                    pin.className += ' bg-amber-950/95 text-amber-300 border-amber-400/70';
+                    pin.innerHTML = `<i class="fa-solid fa-eye text-[9px]"></i><span>${el.shortTag}</span>`;
+                } else {
+                    pin.className += ' bg-slate-900/90 text-slate-100 border-slate-600/70';
+                    pin.innerHTML = `<span>${el.shortTag}</span>`;
+                }
+
+                pin.onclick = (e) => {
+                    e.stopPropagation();
+                    selectElementById(el.id);
+                };
+
+                container.appendChild(pin);
+                pinDomById[el.id] = pin;
+            });
+        }
+
+        function update3DPinsPosition() {
+            const container = document.getElementById('canvas-container');
+            if (!container) return;
+            const w = container.clientWidth;
+            const h = container.clientHeight;
+
+            PLAN_ELEMENTS.forEach(el => {
+                const pin = pinDomById[el.id];
+                if (!pin) return;
+
+                // Check visibility based on floor filter
+                const floorVisible =
+                    (currentFloorFilter === 'both' || currentFloorFilter === 'exploded') ||
+                    (currentFloorFilter === 'first' && el.floor === 'first') ||
+                    (currentFloorFilter === 'ground' && el.floor === 'ground');
+
+                if (!showPinLabels || !floorVisible) {
+                    pin.style.display = 'none';
+                    return;
+                }
+
+                const yBase = el.floor === 'first' ? (3.2 + explodeOffset) : 0;
+                const yHeight = el.category === 'doors' ? 1.4 : 0.45;
+                const worldPos = new THREE.Vector3(el.x + el.w / 2, yBase + yHeight, el.z + el.d / 2);
+                worldPos.project(camera);
+
+                if (worldPos.z > 1) {
+                    pin.style.display = 'none';
+                    return;
+                }
+
+                const screenX = (worldPos.x * 0.5 + 0.5) * w;
+                const screenY = (-worldPos.y * 0.5 + 0.5) * h;
+
+                pin.style.display = 'flex';
+                pin.style.left = `${screenX}px`;
+                pin.style.top = `${screenY}px`;
+            });
+        }
+
+        function handleCanvasClick(event) {
+            const rect = renderer.domElement.getBoundingClientRect();
+            mouseVec.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+            mouseVec.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+            raycaster.setFromCamera(mouseVec, camera);
+            const visibleMeshes = interactiveMeshes.filter(m => m.parent && m.parent.visible);
+            const hits = raycaster.intersectObjects(visibleMeshes, false);
+
+            if (hits.length > 0) {
+                const hitId = hits[0].object.userData.elementId;
+                if (hitId) {
+                    selectElementById(hitId);
+                }
+            }
+        }
+
+        /***********************************************************************
+         * 4. 2D INTERACTIVE SVG BLUEPRINT & X-RAY OVERLAY GENERATOR
+         ***********************************************************************/
+        const SVG_SCALE = 20; // 1 unit = 20px
+
+        function renderAll2DBlueprints() {
+            renderSingleFloorSVG('svg-first-floor', 'first', false);
+            renderSingleFloorSVG('svg-ground-floor', 'ground', false);
+            renderOverlayFloorSVG('svg-overlay-floor');
+        }
+
+        function renderSingleFloorSVG(svgId, floorKey, isOverlay) {
+            const svg = document.getElementById(svgId);
+            if (!svg) return;
+            svg.innerHTML = '';
+
+            // Outer Dimension Frame
+            const frame = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+            frame.setAttribute('x', 0);
+            frame.setAttribute('y', 0);
+            frame.setAttribute('width', 20 * SVG_SCALE);
+            frame.setAttribute('height', 14 * SVG_SCALE);
+            frame.setAttribute('fill', 'rgba(15, 23, 42, 0.7)');
+            frame.setAttribute('stroke', '#334155');
+            frame.setAttribute('stroke-width', '2');
+            svg.appendChild(frame);
+
+            const elements = PLAN_ELEMENTS.filter(e => e.floor === floorKey);
+
+            // Draw rooms & balconies first, then doors on top
+            const sorted = [...elements].sort((a, b) => (a.category === 'doors' ? 1 : -1));
+
+            sorted.forEach(el => {
+                const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                g.setAttribute('class', `svg-zone ${el.id === selectedElementId ? 'selected-zone' : ''}`);
+                g.setAttribute('data-id', el.id);
+                g.onclick = () => selectElementById(el.id);
+
+                const x = el.x * SVG_SCALE;
+                const y = el.z * SVG_SCALE;
+                const w = el.w * SVG_SCALE;
+                const h = el.d * SVG_SCALE;
+
+                if (el.id === 'g_kitchen') {
+                    // Draw exact L-shape polygon for Open Kitchen
+                    const poly = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+                    const pts = [
+                        `${0},${8.2 * SVG_SCALE}`,
+                        `${2.8 * SVG_SCALE},${8.2 * SVG_SCALE}`,
+                        `${2.8 * SVG_SCALE},${11.8 * SVG_SCALE}`,
+                        `${6.8 * SVG_SCALE},${11.8 * SVG_SCALE}`,
+                        `${6.8 * SVG_SCALE},${14.0 * SVG_SCALE}`,
+                        `${0},${14.0 * SVG_SCALE}`
+                    ].join(' ');
+                    poly.setAttribute('points', pts);
+                    poly.setAttribute('fill', el.svgFill);
+                    poly.setAttribute('stroke', el.svgStroke);
+                    poly.setAttribute('stroke-width', '2');
+                    g.appendChild(poly);
+                } else {
+                    const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                    rect.setAttribute('x', x);
+                    rect.setAttribute('y', y);
+                    rect.setAttribute('width', w);
+                    rect.setAttribute('height', h);
+                    rect.setAttribute('rx', el.category === 'bath' || el.category === 'balcony' || el.id === 'f1_p2' ? '8' : '3');
+                    rect.setAttribute('fill', el.svgFill);
+                    rect.setAttribute('stroke', el.svgStroke);
+                    rect.setAttribute('stroke-width', el.category === 'doors' ? '1.5' : '2');
+                    if (el.id === 'f1_p2') {
+                        rect.setAttribute('stroke-dasharray', '6 4');
+                    }
+                    g.appendChild(rect);
+                }
+
+                // Label inside SVG Zone
+                const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                const cx = el.id === 'g_kitchen' ? (1.4 * SVG_SCALE) : (x + w / 2);
+                const cy = el.id === 'g_kitchen' ? (11.5 * SVG_SCALE) : (y + h / 2);
+                text.setAttribute('x', cx);
+                text.setAttribute('y', cy);
+                text.setAttribute('text-anchor', 'middle');
+                text.setAttribute('dominant-baseline', 'middle');
+                text.setAttribute('fill', el.category === 'doors' ? '#064e3b' : '#f8fafc');
+                text.setAttribute('font-size', el.category === 'doors' ? '8.5' : '10.5');
+                text.setAttribute('font-weight', '600');
+                text.setAttribute('font-family', 'Inter, sans-serif');
+                text.textContent = el.shortTag;
+                g.appendChild(text);
+
+                // Subtitle for P2 Cutout
+                if (el.id === 'f1_p2') {
+                    const sub = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                    sub.setAttribute('x', cx);
+                    sub.setAttribute('y', cy + 14);
+                    sub.setAttribute('text-anchor', 'middle');
+                    sub.setAttribute('fill', '#fde68a');
+                    sub.setAttribute('font-size', '8.5');
+                    sub.textContent = '(Looks down to Ground Dining)';
+                    g.appendChild(sub);
+                }
+
+                svg.appendChild(g);
+            });
+
+            // Draw Flow Arrows if enabled
+            if (showFlowLines) {
+                drawSVGFlowLines(svg, floorKey);
+            }
+        }
+
+        function drawSVGFlowLines(svg, floorKey) {
+            const pathGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+            pathGroup.setAttribute('pointer-events', 'none');
+
+            const flows = floorKey === 'first'
+                ? [
+                    // Ref 2 to P1 and doors f1 d1, f1 d2, f1 d3
+                    `M ${1.4 * SVG_SCALE} ${7.7 * SVG_SCALE} L ${7.1 * SVG_SCALE} ${6.0 * SVG_SCALE} L ${7.1 * SVG_SCALE} ${4.5 * SVG_SCALE}`,
+                    `M ${7.1 * SVG_SCALE} ${6.0 * SVG_SCALE} L ${11.1 * SVG_SCALE} ${6.0 * SVG_SCALE} L ${11.1 * SVG_SCALE} ${4.5 * SVG_SCALE}`,
+                    `M ${11.1 * SVG_SCALE} ${6.0 * SVG_SCALE} L ${15.2 * SVG_SCALE} ${10.8 * SVG_SCALE} L ${15.2 * SVG_SCALE} ${12.8 * SVG_SCALE}`
+                ]
+                : [
+                    // Main Entry to Dining, Kitchen, and Ref 1 Stairs
+                    `M ${12.4 * SVG_SCALE} ${13.8 * SVG_SCALE} L ${7.5 * SVG_SCALE} ${7.8 * SVG_SCALE} L ${1.7 * SVG_SCALE} ${6.4 * SVG_SCALE}`,
+                    `M ${17.0 * SVG_SCALE} ${9.7 * SVG_SCALE} L ${7.5 * SVG_SCALE} ${7.8 * SVG_SCALE}`
+                ];
+
+            flows.forEach(d => {
+                const p = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                p.setAttribute('d', d);
+                p.setAttribute('fill', 'none');
+                p.setAttribute('stroke', '#38bdf8');
+                p.setAttribute('stroke-width', '1.8');
+                p.setAttribute('class', 'flow-path');
+                pathGroup.appendChild(p);
+            });
+
+            svg.appendChild(pathGroup);
+        }
+
+        function renderOverlayFloorSVG(svgId) {
+            const svg = document.getElementById(svgId);
+            if (!svg) return;
+            svg.innerHTML = '';
+
+            // 1. Render Ground Floor as Solid Base
+            PLAN_ELEMENTS.filter(e => e.floor === 'ground').forEach(el => {
+                const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                g.setAttribute('class', `svg-zone ${el.id === selectedElementId ? 'selected-zone' : ''}`);
+                g.onclick = () => selectElementById(el.id);
+
+                const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                rect.setAttribute('x', el.x * SVG_SCALE);
+                rect.setAttribute('y', el.z * SVG_SCALE);
+                rect.setAttribute('width', el.w * SVG_SCALE);
+                rect.setAttribute('height', el.d * SVG_SCALE);
+                rect.setAttribute('fill', 'rgba(245, 158, 11, 0.14)');
+                rect.setAttribute('stroke', '#d97706');
+                rect.setAttribute('stroke-width', '1.5');
+                g.appendChild(rect);
+
+                const lbl = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                lbl.setAttribute('x', (el.x + el.w / 2) * SVG_SCALE);
+                lbl.setAttribute('y', (el.z + el.d / 2) * SVG_SCALE + 8);
+                lbl.setAttribute('text-anchor', 'middle');
+                lbl.setAttribute('fill', '#fcd34d');
+                lbl.setAttribute('font-size', '8.5');
+                lbl.textContent = `[G] ${el.shortTag}`;
+                g.appendChild(lbl);
+                svg.appendChild(g);
+            });
+
+            // 2. Render First Floor as Dashed Emerald Overlay on Top
+            PLAN_ELEMENTS.filter(e => e.floor === 'first').forEach(el => {
+                const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                g.setAttribute('class', `svg-zone ${el.id === selectedElementId ? 'selected-zone' : ''}`);
+                g.onclick = () => selectElementById(el.id);
+
+                const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                rect.setAttribute('x', el.x * SVG_SCALE);
+                rect.setAttribute('y', el.z * SVG_SCALE);
+                rect.setAttribute('width', el.w * SVG_SCALE);
+                rect.setAttribute('height', el.d * SVG_SCALE);
+                rect.setAttribute('fill', 'rgba(16, 185, 129, 0.14)');
+                rect.setAttribute('stroke', '#10b981');
+                rect.setAttribute('stroke-width', '2');
+                rect.setAttribute('stroke-dasharray', '5 3');
+                g.appendChild(rect);
+
+                const lbl = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                lbl.setAttribute('x', (el.x + el.w / 2) * SVG_SCALE);
+                lbl.setAttribute('y', (el.z + el.d / 2) * SVG_SCALE - 5);
+                lbl.setAttribute('text-anchor', 'middle');
+                lbl.setAttribute('fill', '#6ee7b7');
+                lbl.setAttribute('font-size', '9');
+                lbl.setAttribute('font-weight', '600');
+                lbl.textContent = `[1F] ${el.shortTag}`;
+                g.appendChild(lbl);
+                svg.appendChild(g);
+            });
+        }
+
+        /***********************************************************************
+         * 5. SELECTION, INSPECTOR SIDEBAR & INTERACTIVE CONTROLS
+         ***********************************************************************/
+        function selectElementById(id) {
+            const el = PLAN_ELEMENTS.find(item => item.id === id);
+            if (!el) return;
+            selectedElementId = id;
+
+            // 1. Highlight 3D Mesh
+            interactiveMeshes.forEach(mesh => {
+                const isSelected = mesh.userData.elementId === id;
+                mesh.material.emissive = new THREE.Color(isSelected ? 0x10b981 : 0x000000);
+                mesh.material.emissiveIntensity = isSelected ? 0.55 : 0;
+            });
+
+            // 2. Highlight Floating 3D Pin
+            Object.keys(pinDomById).forEach(pinId => {
+                pinDomById[pinId].classList.toggle('active-pin', pinId === id);
+            });
+
+            // 3. Gently pan camera target toward selected element in 3D
+            const targetY = el.floor === 'first' ? (3.2 + explodeOffset) : 0.5;
+            camState.targetDest.set(el.x + el.w / 2, targetY, el.z + el.d / 2);
+
+            // 4. Update Inspector Panel UI
+            document.getElementById('inspector-badge').textContent = el.shortTag.toUpperCase();
+            document.getElementById('insp-title').textContent = el.name;
+            document.getElementById('insp-floor').textContent = el.floor === 'first' ? 'First Floor (Upper Level)' : 'Ground Floor (Lower Level)';
+            document.getElementById('insp-subtitle').textContent = `"${el.planLabel}"`;
+            document.getElementById('insp-desc').textContent = el.description;
+
+            const savedEdit = customUserEdits[id] || {};
+            document.getElementById('insp-dim-input').value = savedEdit.dim || el.dim;
+            document.getElementById('insp-notes-input').value = savedEdit.note || '';
+            document.getElementById('insp-stack').textContent = el.stackInfo;
+
+            // Populate clickable connection chips
+            const connContainer = document.getElementById('insp-connections');
+            connContainer.innerHTML = '';
+            (el.connections || []).forEach(connId => {
+                const target = PLAN_ELEMENTS.find(item => item.id === connId);
+                if (!target) return;
+                const btn = document.createElement('button');
+                btn.className = 'px-2 py-1 rounded-md bg-slate-800 hover:bg-emerald-500/20 border border-slate-700 hover:border-emerald-500/40 text-[11px] text-slate-200 hover:text-emerald-300 transition flex items-center gap-1';
+                btn.innerHTML = `<i class="fa-solid fa-link text-[9px] text-emerald-400"></i><span>${target.shortTag}</span>`;
+                btn.onclick = () => selectElementById(target.id);
+                connContainer.appendChild(btn);
+            });
+
+            // 5. Update 2D Blueprints & Directory List Active State
+            renderAll2DBlueprints();
+            renderDirectoryList();
+        }
+
+        function saveCustomField(field, val) {
+            if (!customUserEdits[selectedElementId]) {
+                customUserEdits[selectedElementId] = {};
+            }
+            customUserEdits[selectedElementId][field] = val;
+        }
+
+        function filterDirectory(tab) {
+            currentDirFilter = tab;
+            ['all', 'doors', 'stairs'].forEach(t => {
+                const btn = document.getElementById(`dir-tab-${t}`);
+                if (t === tab) {
+                    btn.className = 'flex-1 py-2 text-center border-b-2 border-emerald-500 text-emerald-400 font-semibold';
+                } else {
+                    btn.className = 'flex-1 py-2 text-center border-b-2 border-transparent text-slate-400 hover:text-slate-200';
+                }
+            });
+            renderDirectoryList();
+        }
+
+        function renderDirectoryList() {
+            const list = document.getElementById('directory-list');
+            list.innerHTML = '';
+
+            const items = PLAN_ELEMENTS.filter(el => {
+                if (currentDirFilter === 'doors') return el.category === 'doors';
+                if (currentDirFilter === 'stairs') return el.category === 'stairs' || el.id === 'f1_p2';
+                return true;
+            });
+
+            items.forEach(el => {
+                const isSelected = el.id === selectedElementId;
+                const item = document.createElement('button');
+                item.className = `w-full text-left px-3 py-2 rounded-xl border transition flex items-center justify-between gap-2 ${
+                    isSelected
+                        ? 'bg-emerald-500/15 border-emerald-500/50 text-white shadow'
+                        : 'bg-slate-950/60 hover:bg-slate-800/70 border-slate-800/90 text-slate-300'
+                }`;
+                item.onclick = () => selectElementById(el.id);
+
+                const badgeColor = el.floor === 'first'
+                    ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
+                    : 'bg-amber-500/20 text-amber-300 border-amber-500/30';
+
+                item.innerHTML = `
+                    <div class="min-w-0">
+                        <div class="text-xs font-semibold truncate">${el.name}</div>
+                        <div class="text-[10px] text-slate-400 truncate">${el.planLabel}</div>
+                    </div>
+                    <span class="px-1.5 py-0.5 rounded text-[10px] font-mono border shrink-0 ${badgeColor}">
+                        ${el.floor === 'first' ? '1F' : 'GF'}
+                    </span>
+                `;
+                list.appendChild(item);
+            });
+        }
+
+        /***********************************************************************
+         * 6. TOOLBAR & VIEWPORT MODE CONTROLLERS
+         ***********************************************************************/
+        function switchMainMode(mode) {
+            currentMainMode = mode;
+            const panel3d = document.getElementById('panel-3d');
+            const panel2d = document.getElementById('panel-2d');
+
+            ['3d', '2d', 'split'].forEach(m => {
+                const btn = document.getElementById(`tab-${m}`);
+                if (!btn) return;
+                if (m === mode) {
+                    btn.className = (m === 'split' ? 'hidden lg:flex ' : 'flex ') +
+                        'items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all bg-emerald-600 text-white shadow';
+                } else {
+                    btn.className = (m === 'split' ? 'hidden lg:flex ' : 'flex ') +
+                        'items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all text-slate-400 hover:text-white';
+                }
+            });
+
+            if (mode === '3d') {
+                panel3d.classList.remove('hidden');
+                panel2d.classList.add('hidden');
+                panel2d.classList.remove('flex');
+            } else if (mode === '2d') {
+                panel3d.classList.add('hidden');
+                panel2d.classList.remove('hidden');
+                panel2d.classList.add('flex');
+                renderAll2DBlueprints();
+            } else if (mode === 'split') {
+                panel3d.classList.remove('hidden');
+                panel2d.classList.remove('hidden');
+                panel2d.classList.add('flex');
+                renderAll2DBlueprints();
+            }
+
+            setTimeout(onWindowResize, 50);
+        }
+
+        function set2DLayoutMode(mode) {
+            const side = document.getElementById('blueprint-side-container');
+            const over = document.getElementById('blueprint-overlay-container');
+            const btnSide = document.getElementById('btn-2d-side');
+            const btnOver = document.getElementById('btn-2d-overlay');
+
+            if (mode === 'side') {
+                side.classList.remove('hidden');
+                over.classList.add('hidden');
+                over.classList.remove('flex');
+                btnSide.className = 'px-3 py-1 rounded-md text-xs font-medium bg-emerald-600 text-white transition';
+                btnOver.className = 'px-3 py-1 rounded-md text-xs font-medium text-slate-400 hover:text-white transition';
+            } else {
+                side.classList.add('hidden');
+                over.classList.remove('hidden');
+                over.classList.add('flex');
+                btnOver.className = 'px-3 py-1 rounded-md text-xs font-medium bg-emerald-600 text-white transition';
+                btnSide.className = 'px-3 py-1 rounded-md text-xs font-medium text-slate-400 hover:text-white transition';
+            }
+        }
+
+        function setFloorFilter(filter) {
+            currentFloorFilter = filter;
+            ['both', 'exploded', 'first', 'ground'].forEach(f => {
+                const btn = document.getElementById(`btn-floor-${f}`);
+                if (f === filter) {
+                    btn.className = 'px-2.5 py-1 rounded-md font-medium bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 transition';
+                } else {
+                    btn.className = 'px-2.5 py-1 rounded-md font-medium bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700 transition';
+                }
+            });
+
+            if (filter === 'both') {
+                groundFloorGroup.visible = true;
+                firstFloorGroup.visible = true;
+                flowGroup.visible = showFlowLines;
+                updateExplodeDistance(0.4);
+                document.getElementById('explode-slider').value = 0.4;
+            } else if (filter === 'exploded') {
+                groundFloorGroup.visible = true;
+                firstFloorGroup.visible = true;
+                flowGroup.visible = showFlowLines;
+                updateExplodeDistance(3.6);
+                document.getElementById('explode-slider').value = 3.6;
+            } else if (filter === 'first') {
+                groundFloorGroup.visible = false;
+                firstFloorGroup.visible = true;
+                flowGroup.visible = false;
+            } else if (filter === 'ground') {
+                groundFloorGroup.visible = true;
+                firstFloorGroup.visible = false;
+                flowGroup.visible = false;
+            }
+        }
+
+        function updateExplodeDistance(val) {
+            explodeOffset = parseFloat(val);
+            if (firstFloorGroup) {
+                firstFloorGroup.position.y = 3.2 + explodeOffset;
+                updateStairAndFlowPositions();
+            }
+        }
+
+        function updateWallOpacity(val) {
+            wallOpacity = parseFloat(val);
+            allWallMeshes.forEach(w => {
+                w.material.opacity = wallOpacity;
+            });
+        }
+
+        function togglePinLabels(checked) {
+            showPinLabels = checked;
+        }
+
+        function toggleFlowArrows(checked) {
+            showFlowLines = checked;
+            if (flowGroup) {
+                flowGroup.visible = checked && (currentFloorFilter === 'both' || currentFloorFilter === 'exploded');
+            }
+            renderAll2DBlueprints();
+        }
+
+        // Camera Presets
+        function focusP2Cutout() {
+            if (currentMainMode === '2d') switchMainMode('3d');
+            setFloorFilter('both');
+            selectElementById('f1_p2');
+            camState.targetDest.set(8.5, 1.8, 8.2);
+            camState.thetaDest = 0.12;
+            camState.phiDest = 0.42; // High angle looking straight down through P2 Void to Dining Table!
+            camState.radiusDest = 16.5;
+        }
+
+        function focusStairConnections() {
+            if (currentMainMode === '2d') switchMainMode('3d');
+            setFloorFilter('exploded');
+            selectElementById('stairs_ref2');
+            camState.targetDest.set(2.2, 2.5, 10.0);
+            camState.thetaDest = -0.85;
+            camState.phiDest = 0.95;
+            camState.radiusDest = 22.0;
+        }
+
+        function resetCameraView() {
+            setFloorFilter('both');
+            camState.targetDest.set(10, 2.0, 7.0);
+            camState.thetaDest = 0.58;
+            camState.phiDest = 0.92;
+            camState.radiusDest = 26.5;
+        }
+
+        function updateCameraTransform(immediate = false) {
+            if (immediate) {
+                camState.theta = camState.thetaDest;
+                camState.phi = camState.phiDest;
+                camState.radius = camState.radiusDest;
+                camState.target.copy(camState.targetDest);
+            } else {
+                const damp = 0.1;
+                camState.theta += (camState.thetaDest - camState.theta) * damp;
+                camState.phi += (camState.phiDest - camState.phi) * damp;
+                camState.radius += (camState.radiusDest - camState.radius) * damp;
+                camState.target.lerp(camState.targetDest, damp);
+            }
+
+            camera.position.x = camState.target.x + camState.radius * Math.sin(camState.phi) * Math.sin(camState.theta);
+            camera.position.y = camState.target.y + camState.radius * Math.cos(camState.phi);
+            camera.position.z = camState.target.z + camState.radius * Math.sin(camState.phi) * Math.cos(camState.theta);
+            camera.lookAt(camState.target);
+        }
+
+        function onWindowResize() {
+            const container = document.getElementById('canvas-container');
+            if (!container || !renderer) return;
+            const w = container.clientWidth;
+            const h = container.clientHeight;
+            if (w === 0 || h === 0) return;
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+            renderer.setSize(w, h);
+        }
+
+        function animateLoop() {
+            requestAnimationFrame(animateLoop);
+            updateCameraTransform(false);
+            if (renderer && scene && camera) {
+                renderer.render(scene, camera);
+                update3DPinsPosition();
+            }
+        }
+
+        window.onload = function () {
+            init3DScene();
+            renderAll2DBlueprints();
+            renderDirectoryList();
+            selectElementById('f1_p2');
+            animateLoop();
+        };
+    </script>
+</body>
+</html>
