@@ -140,6 +140,14 @@
             height: 100%;
             outline: none;
         }
+    
+        /* Measurements Visibility Toggle */
+        .hide-measurements .cad-dimension,
+        .hide-measurements .measure-sub,
+        .hide-measurements .cad-3d-measure {
+            display: none !important;
+        }
+
     </style>
 </head>
 <body class="h-screen flex flex-col overflow-hidden bg-slate-950 text-slate-100">
@@ -624,7 +632,7 @@
                 </button>
                 <button id="sb-tab-views" onclick="enterViewListScreen()" class="flex-1 py-1.5 px-2 rounded-lg text-xs font-semibold text-slate-400 hover:text-white hover:bg-slate-900 border border-transparent transition flex items-center justify-center gap-1.5">
                     <i class="fa-solid fa-table-list text-emerald-400"></i>
-                    <span>Views List (9)</span>
+                    <span>Views List (11)</span>
                 </button>
             </div>
 
@@ -754,7 +762,7 @@
                 </button>
                 <button class="flex-1 py-1.5 px-2 rounded-lg text-xs font-semibold bg-emerald-600/30 text-emerald-300 border border-emerald-500/40 flex items-center justify-center gap-1.5 transition">
                     <i class="fa-solid fa-table-list text-emerald-400"></i>
-                    <span>Views List (9)</span>
+                    <span>Views List (11)</span>
                 </button>
             </div>
 
@@ -786,7 +794,7 @@
                 <!-- Filter Category Tabs -->
                 <div class="flex flex-wrap gap-1 mt-2">
                     <button id="vl-cat-all" onclick="filterViewListByCategory('all')" class="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 transition">
-                        All (9)
+                        All (11)
                     </button>
                     <button id="vl-cat-3d" onclick="filterViewListByCategory('3d')" class="px-2 py-0.5 rounded text-[10px] font-medium text-slate-400 hover:text-white bg-slate-950 border border-slate-800 transition">
                         3D Elevations
@@ -841,9 +849,9 @@
                 codedColor: 0x3b82f6, // Distinct Blue in Zone Color mode
                 svgFill: 'rgba(59, 130, 246, 0.24)',
                 svgStroke: '#60a5fa',
-                dim: "25'-9\" × 15'-6\"",
+                dim: "11'-3\" × 10'-6\"",
                 stackInfo: 'Directly above Master Bedroom',
-                description: 'Upper-level primary bedroom occupying the top-left corner. Includes an internal left-side attached bathroom (Bath 1), private north balcony via door f1 d5, and entry from P1 walkway via door f1 d1.',
+                description: 'Upper-level primary bedroom occupying the top-left corner (11\'-3" × 10\'-6" clear span). Includes an internal left-side attached bathroom (Bath 1), private north balcony via door f1 d5, and entry from P1 walkway via door f1 d1.',
                 connections: ['f1_bath1', 'f1_balc_bed1', 'door_f1d1', 'door_f1d5', 'g_master']
             },
             {
@@ -858,9 +866,9 @@
                 codedColor: 0x06b6d4,
                 svgFill: 'rgba(6, 182, 212, 0.30)',
                 svgStroke: '#22d3ee',
-                dim: "6'-0\" × 10'-3\"",
+                dim: "2'-7\" × 7'-0\"",
                 stackInfo: 'Above Master Bedroom West Side',
-                description: 'En-suite bathroom enclosed inside the left wall of Bed Room 1 with vanity, WC, and shower area.',
+                description: 'En-suite bathroom (2\'-7" × 7\'-0") enclosed inside Bed Room 1 with vanity, WC, and shower area.',
                 connections: ['f1_bed1']
             },
             {
@@ -875,9 +883,9 @@
                 codedColor: 0x14b8a6,
                 svgFill: 'rgba(20, 184, 166, 0.24)',
                 svgStroke: '#2dd4bf',
-                dim: "18'-6\" × 5'-6\"",
+                dim: "11'-3\" × 4'-0\"",
                 stackInfo: 'Cantilevered North Balcony',
-                description: 'Private sit-out balcony exclusively for Bed Room 1, accessed through door f1 d5.',
+                description: 'Private sit-out balcony exclusively for Bed Room 1 (11\'-3" × 4\'-0"), accessed through door f1 d5.',
                 connections: ['door_f1d5', 'f1_bed1']
             },
             {
@@ -892,10 +900,10 @@
                 codedColor: 0x6366f1,
                 svgFill: 'rgba(99, 102, 241, 0.24)',
                 svgStroke: '#818cf8',
-                dim: "25'-9\" × 15'-6\"",
-                stackInfo: 'Above Master Bath & Upper Hall',
-                description: 'Second upper-level bedroom suite with right-side attached bathroom (Bath 2), private north balcony via door f1 d4, and entry from P1 gallery via door f1 d2.',
-                connections: ['f1_bath2', 'f1_balc_bed2', 'door_f1d2', 'door_f1d4', 'f1_p1']
+                dim: "11'-0\" × 10'-6\"",
+                stackInfo: 'Above Utility Alcove & Drop Beam',
+                description: 'Second upper-level bedroom suite (11\'-0" × 10\'-6" clear span) supported by drop beam above Ground Floor Utility, with attached Bath 2, private north balcony via door f1 d4, and entry via door f1 d2.',
+                connections: ['f1_bath2', 'f1_balc_bed2', 'door_f1d2', 'door_f1d4', 'f1_p1', 'g_utility']
             },
             {
                 id: 'f1_bath2',
@@ -909,9 +917,9 @@
                 codedColor: 0x06b6d4,
                 svgFill: 'rgba(6, 182, 212, 0.30)',
                 svgStroke: '#22d3ee',
-                dim: "6'-0\" × 10'-3\"",
-                stackInfo: 'Above Upper Hall Zone',
-                description: 'En-suite bathroom positioned along the interior right wall of Bed Room 2.',
+                dim: "2'-7\" × 7'-0\"",
+                stackInfo: 'Inside Bed Room 2 Right Wall',
+                description: 'En-suite bathroom (2\'-7" × 7\'-0") positioned along the interior right wall of Bed Room 2.',
                 connections: ['f1_bed2']
             },
             {
@@ -926,27 +934,27 @@
                 codedColor: 0x14b8a6,
                 svgFill: 'rgba(20, 184, 166, 0.24)',
                 svgStroke: '#2dd4bf',
-                dim: "18'-6\" × 5'-6\"",
+                dim: "11'-0\" × 4'-0\"",
                 stackInfo: 'Cantilevered North Balcony',
-                description: 'Dedicated private balcony exclusively serving Bed Room 2 via door f1 d4.',
+                description: 'Private sit-out balcony exclusively for Bed Room 2 (11\'-0" × 4\'-0"), accessed through door f1 d4.',
                 connections: ['door_f1d4', 'f1_bed2']
             },
             {
                 id: 'f1_p1',
                 name: 'P1 — Space to Roam (Upper Walkway)',
-                shortTag: 'P1 Roaming Gallery',
+                shortTag: 'P1 Walkway',
                 floor: 'first',
                 category: 'room',
-                planLabel: 'P1 is space to roam / place to roam',
+                planLabel: 'p1 - space to rome',
                 x: 0, z: 5.2, w: 17.2, d: 6.4,
-                color: 0xf3ede2,
-                codedColor: 0x64748b,
-                svgFill: 'rgba(148, 163, 184, 0.16)',
-                svgStroke: '#cbd5e1',
-                dim: "51'-6\" × 19'-3\" Gallery",
-                stackInfo: 'Wraps around P2 Void above Hall',
-                description: 'Wide interior circulation gallery wrapping all 4 sides of the central P2 cutout. Connects internal duplex stairs (Ref 2), Bed Room 1 (f1 d1), Bed Room 2 (f1 d2), and shared balcony door (f1 d3).',
-                connections: ['f1_p2', 'stairs_ref2', 'door_f1d1', 'door_f1d2', 'door_f1d3']
+                color: 0xf1f5f9,
+                codedColor: 0x10b981,
+                svgFill: 'rgba(16, 185, 129, 0.18)',
+                svgStroke: '#34d399',
+                dim: "17'-3\" × 8'-0\"",
+                stackInfo: 'Directly above Ground Living & Dining',
+                description: 'Continuous upper roaming gallery (17\'-3" length) encircling the central double-height void. Connects both bedrooms, internal stairs landing (Ref 2), and front balcony.',
+                connections: ['stairs_ref2', 'f1_p2', 'f1_bed1', 'f1_bed2', 'door_f1d1', 'door_f1d2', 'door_f1d3', 'g_dining']
             },
             {
                 id: 'f1_p2',
@@ -954,15 +962,15 @@
                 shortTag: 'P2 Open Void',
                 floor: 'first',
                 category: 'void',
-                planLabel: 'P2: Open place full empty from this space we can see the ground floor',
-                x: 4.0, z: 6.6, w: 9.4, d: 3.6,
-                color: 0xf59e0b,
+                planLabel: 'p2 - open (Cutout over Dining)',
+                x: 3.6, z: 6.4, w: 9.8, d: 4.2,
+                color: 0x071022,
                 codedColor: 0xf59e0b,
-                svgFill: 'rgba(245, 158, 11, 0.22)',
+                svgFill: 'rgba(245, 158, 11, 0.16)',
                 svgStroke: '#fbbf24',
-                dim: "28'-3\" × 10'-9\" Void",
-                stackInfo: '21.5 ft Double-Height over Dining',
-                description: 'Central double-height architectural void surrounded by glass railings in P1. Looks straight down onto the Ground Floor Dining Table with a suspended modern chandelier.',
+                dim: "12'-0\" × 8'-0\" Cutout",
+                stackInfo: 'Directly above Ground Dining Table',
+                description: 'Crucial double-height architectural cutout (12\'-0" × 8\'-0" clear void) cut into the first-floor slab directly above the dining table, crowned with modern hanging chandelier.',
                 connections: ['f1_p1', 'g_dining']
             },
             {
@@ -971,15 +979,15 @@
                 shortTag: 'Ref 2 (Duplex Up)',
                 floor: 'first',
                 category: 'stairs',
-                planLabel: 'reference 2 connected with reference 1: Steps to first floor duplex style goes inside',
+                planLabel: 'reference 2: Steps to first floor duplex style goes inside',
                 x: 0, z: 6.4, w: 2.8, d: 2.6,
                 color: 0xb45309,
                 codedColor: 0xa855f7,
                 svgFill: 'rgba(168, 85, 247, 0.32)',
                 svgStroke: '#c084fc',
-                dim: "8'-6\" × 7'-9\" Landing",
+                dim: "10'-3\" × 5'-0\" Landing",
                 stackInfo: 'Arrives from Reference 1 below',
-                description: 'Upper arrival landing of the indoor duplex staircase along the middle-left wall, stepping directly into the P1 walkway.',
+                description: 'Upper arrival landing (10\'-3" × 5\'-0", 5\'-0" steps) of the indoor duplex staircase along the middle-left wall, stepping directly into the P1 walkway.',
                 connections: ['stairs_ref1', 'f1_p1']
             },
             {
@@ -994,9 +1002,9 @@
                 codedColor: 0x0d9488,
                 svgFill: 'rgba(20, 184, 166, 0.22)',
                 svgStroke: '#2dd4bf',
-                dim: "51'-6\" × 7'-3\"",
+                dim: "22'-3\" × 8'-0\"",
                 stackInfo: 'Above Kitchen, God Room & Main Entry',
-                description: 'Front south-facing terrace running along the bottom edge of the First Floor. Receives the external staircase at Ref 4 on the left and connects to P1 via door f1 d3 on the right.',
+                description: 'Front south-facing terrace (22\'-3" × 8\'-0") running along the bottom edge of the First Floor. Receives the external staircase at Ref 4 on the left and connects to P1 via door f1 d3.',
                 connections: ['stairs_ref4', 'door_f1d3', 'f1_balc_side2']
             },
             {
@@ -1011,9 +1019,9 @@
                 codedColor: 0x0284c7,
                 svgFill: 'rgba(56, 189, 248, 0.32)',
                 svgStroke: '#38bdf8',
-                dim: "12'-6\" × 5'-9\"",
+                dim: "11'-6\" × 4'-0\"",
                 stackInfo: 'Arrives from Ref 3 External Stairs',
-                description: 'Upper landing of the outdoor staircase at the bottom-left corner of 1st Floor Balcony Side 1, allowing direct independent access to the upper floor.',
+                description: 'Upper landing (11\'-6" × 4\'-0") of the outdoor staircase at the bottom-left corner of 1st Floor Balcony Side 1, allowing direct independent access to the upper floor.',
                 connections: ['stairs_ref3', 'f1_balc_side1']
             },
             {
@@ -1028,9 +1036,9 @@
                 codedColor: 0x0d9488,
                 svgFill: 'rgba(20, 184, 166, 0.22)',
                 svgStroke: '#2dd4bf',
-                dim: "8'-6\" × 42'-0\"",
-                stackInfo: 'Above Common Bath & Open Side Zone',
-                description: 'Full-depth east terrace running along the right side of the first floor, merging with Side 1 to form an L-shaped wrap-around balcony above the Ground Floor Common Bath and open unwalled side area.',
+                dim: "8'-0\" × 35'-9\"",
+                stackInfo: 'Above Common Bath & Open Yard Zone',
+                description: 'Full-depth east terrace (8\'-0" × 35\'-9") running along the right side of the first floor, merging with Side 1 to form an L-shaped wrap-around balcony above the Ground Floor Common Bath and open yard.',
                 connections: ['f1_balc_side1', 'g_common_bath']
             },
 
@@ -1047,7 +1055,7 @@
                 codedColor: 0xd97706,
                 svgFill: '#f59e0b',
                 svgStroke: '#fef3c7',
-                dim: "3'-6\" × 7'-0\" Door",
+                dim: "3'-3\" × 7'-0\"",
                 stackInfo: 'First Floor Interior Door',
                 description: 'Main bedroom door connecting Bed Room 1 to the P1 interior roaming gallery.',
                 connections: ['f1_bed1', 'f1_p1']
@@ -1064,7 +1072,7 @@
                 codedColor: 0xd97706,
                 svgFill: '#f59e0b',
                 svgStroke: '#fef3c7',
-                dim: "3'-6\" × 7'-0\" Door",
+                dim: "3'-3\" × 7'-0\"",
                 stackInfo: 'First Floor Interior Door',
                 description: 'Main bedroom door connecting Bed Room 2 to the P1 interior roaming gallery.',
                 connections: ['f1_bed2', 'f1_p1']
@@ -1081,7 +1089,7 @@
                 codedColor: 0xd97706,
                 svgFill: '#f59e0b',
                 svgStroke: '#fef3c7',
-                dim: "4'-0\" × 7'-0\" Terrace Door",
+                dim: "3'-3\" × 7'-0\"",
                 stackInfo: 'First Floor Balcony Access',
                 description: 'Connects the P1 interior roaming walkway out to the L-shaped 1st Floor Balcony (Side 1 & Side 2).',
                 connections: ['f1_p1', 'f1_balc_side1', 'f1_balc_side2']
@@ -1098,7 +1106,7 @@
                 codedColor: 0xd97706,
                 svgFill: '#f59e0b',
                 svgStroke: '#fef3c7',
-                dim: "3'-6\" × 7'-0\" Balcony Door",
+                dim: "3'-0\" × 7'-0\"",
                 stackInfo: 'North Wall of Bed Room 2',
                 description: 'Balcony door opening from Bed Room 2 onto Particular Balcony for Bedroom 2.',
                 connections: ['f1_bed2', 'f1_balc_bed2']
@@ -1115,7 +1123,7 @@
                 codedColor: 0xd97706,
                 svgFill: '#f59e0b',
                 svgStroke: '#fef3c7',
-                dim: "3'-6\" × 7'-0\" Balcony Door",
+                dim: "3'-0\" × 7'-0\"",
                 stackInfo: 'North Wall of Bed Room 1',
                 description: 'Balcony door opening from Bed Room 1 onto Particular Balcony for Bedroom 1.',
                 connections: ['f1_bed1', 'f1_balc_bed1']
@@ -1134,9 +1142,9 @@
                 codedColor: 0x2563eb,
                 svgFill: 'rgba(37, 99, 235, 0.24)',
                 svgStroke: '#60a5fa',
-                dim: "33'-6\" × 15'-6\" Suite",
-                stackInfo: 'Below Bed Room 1 & part of Bed Room 2',
-                description: 'Grand ground-floor Master Bedroom Suite in the top-left section, ideal for parents/elders on the ground level. Includes a large internal attached bathroom along its right wall.',
+                dim: "10'-0\" × 10'-6\" (15'-0\" Suite)",
+                stackInfo: 'Below Bed Room 1 Suite',
+                description: 'Ground-floor Master Bedroom Suite in top-left section (10\'-0" × 10\'-6" clear bed, part of 15\'-0" Suite width). Includes private attached bath along its right wall.',
                 connections: ['g_master_bath', 'stairs_ref1', 'g_dining']
             },
             {
@@ -1151,10 +1159,27 @@
                 codedColor: 0x0891b2,
                 svgFill: 'rgba(6, 182, 212, 0.30)',
                 svgStroke: '#22d3ee',
-                dim: "7'-6\" × 13'-3\"",
-                stackInfo: 'Inside Right Edge of Master Bedroom',
-                description: 'Spacious private en-suite bathroom inside the right portion of the Master Bedroom.',
+                dim: "5'-0\" × 9'-0\"",
+                stackInfo: 'Inside Right Edge of Master Bedroom Suite',
+                description: 'Private en-suite bathroom (5\'-0" × 9\'-0") inside the Master Suite with premium sanitary fittings.',
                 connections: ['g_master']
+            },
+            {
+                id: 'g_utility',
+                name: 'Utility / Wash Bay (Alcove)',
+                shortTag: 'Utility / Wash',
+                floor: 'ground',
+                category: 'room',
+                planLabel: 'Utility / Wash Bay (Drop Beam Above)',
+                x: 11.2, z: 0, w: 4.8, d: 5.2,
+                color: 0x94a3b8,
+                codedColor: 0x64748b,
+                svgFill: 'rgba(100, 116, 139, 0.25)',
+                svgStroke: '#94a3b8',
+                dim: "7'-3\" × 10'-6\"",
+                stackInfo: 'Under Bed Room 2 (Drop Beam Overhead)',
+                description: 'Utility & wash bay alcove (7\'-3" × 10\'-6") between Master Suite and Common Bath, structurally designed with drop beam supporting First Floor Bed Room 2 above.',
+                connections: ['g_master', 'g_common_bath', 'f1_bed2']
             },
             {
                 id: 'stairs_ref1',
@@ -1168,9 +1193,9 @@
                 codedColor: 0xa855f7,
                 svgFill: 'rgba(168, 85, 247, 0.30)',
                 svgStroke: '#c084fc',
-                dim: "10'-3\" × 5'-6\" Base",
+                dim: "10'-3\" × 5'-0\" Base",
                 stackInfo: 'Ascends inside to Reference 2 in P1',
-                description: 'Indoor duplex staircase with floating wood treads and glass railing between the Master Bedroom and Open Kitchen, rising directly into P1 on the First Floor.',
+                description: 'Indoor duplex staircase (10\'-3" stair span × 5\'-0" width) between Master Bedroom and Kitchen, rising directly into P1 on the First Floor.',
                 connections: ['stairs_ref2', 'g_dining', 'g_kitchen']
             },
             {
@@ -1185,9 +1210,9 @@
                 codedColor: 0xf59e0b,
                 svgFill: 'rgba(245, 158, 11, 0.25)',
                 svgStroke: '#fbbf24',
-                dim: "15'-0\" × 8'-6\" Core",
+                dim: "10'-0\" × 6'-6\" Core",
                 stackInfo: 'Directly underneath P2 Double-Height Void',
-                description: 'Central family dining core positioned right below the First Floor P2 cutout. Crowned by a double-height chandelier with open sightlines to both floors.',
+                description: 'Central family dining core (10\'-0" × 6\'-6") positioned right below the First Floor P2 12\'×8\' cutout. Crowned by a double-height chandelier with open sightlines.',
                 connections: ['f1_p2', 'g_kitchen', 'g_main_entry', 'g_master']
             },
             {
@@ -1202,9 +1227,9 @@
                 codedColor: 0xf43f5e,
                 svgFill: 'rgba(244, 63, 94, 0.24)',
                 svgStroke: '#fb7185',
-                dim: "20'-6\" × 17'-6\" L-Zone",
+                dim: "11'-6\" × 12'-0\" L-Zone",
                 stackInfo: 'Bottom-Left under P1 & Balcony Side 1',
-                description: 'Open L-shaped kitchen occupying the bottom-left corner with granite counters, sink, 4-burner hob, and refrigerator, openly connected to the Dining Table.',
+                description: 'Open L-shaped kitchen (11\'-6" L-base × 12\'-0" depth, 5\'-6" top leg) occupying the bottom-left corner with 4\'-0" landing gap to stairs.',
                 connections: ['g_dining', 'g_god_room', 'stairs_ref1']
             },
             {
@@ -1219,9 +1244,9 @@
                 codedColor: 0xf97316,
                 svgFill: 'rgba(249, 115, 22, 0.28)',
                 svgStroke: '#fb923c',
-                dim: "5'-6\" × 7'-3\" Mandir",
-                stackInfo: 'Bottom Wall between Kitchen & Main Entry',
-                description: 'Sacred Pooja / Small God Room tucked along the front wall between the Open Kitchen and Main Entry Gate, featuring an illuminated Mandir unit.',
+                dim: "4'-6\" × 6'-0\" Mandir",
+                stackInfo: 'Bottom Wall between Kitchen & 6\'-3" Foyer',
+                description: 'Sacred Pooja / Small God Room (4\'-6" × 6\'-0") with 6\'-3" entry foyer along the front wall beside the Main Entry Gate.',
                 connections: ['g_kitchen', 'g_main_entry', 'g_dining']
             },
             {
@@ -1236,9 +1261,9 @@
                 codedColor: 0xd97706,
                 svgFill: '#f59e0b',
                 svgStroke: '#fef3c7',
-                dim: "7'-3\" Double Door Gate",
+                dim: "7'-3\" Entry Gate",
                 stackInfo: 'South Perimeter Wall',
-                description: 'Grand double-leaf Main Entry Gate on the bottom wall welcoming family and guests straight into the double-height living and dining hall.',
+                description: 'Grand 7\'-3" wide South Main Entry Gate welcoming family and guests straight into the ground hall and dining core.',
                 connections: ['g_dining', 'g_god_room', 'g_second_entry']
             },
             {
@@ -1253,9 +1278,9 @@
                 codedColor: 0x06b6d4,
                 svgFill: 'rgba(6, 182, 212, 0.28)',
                 svgStroke: '#22d3ee',
-                dim: "8'-6\" × 13'-6\"",
+                dim: "8'-0\" × 10'-6\"",
                 stackInfo: 'Under 1st Floor Balcony Side 2 (North)',
-                description: 'Shared ground-floor bathroom projecting at the top-right corner. There is no boundary wall on the ground floor south of this bathroom.',
+                description: 'Shared ground-floor bathroom (8\'-0" × 10\'-6") projecting at the top-right corner. South of this bathroom is an open 8\'×21\' yard with no boundary wall.',
                 connections: ['g_second_entry', 'f1_balc_side2']
             },
             {
@@ -1270,9 +1295,9 @@
                 codedColor: 0xd97706,
                 svgFill: '#f59e0b',
                 svgStroke: '#fef3c7',
-                dim: "6'-6\" Side Entry Gate",
-                stackInfo: 'Right Wall of Main Ground Hall',
-                description: 'Secondary entry gate on the right wall of the main hall opening directly to the unwalled open side area and Common Bathroom.',
+                dim: "6'-6\" Side Gate",
+                stackInfo: 'Right Wall to 8\'×21\' Yard',
+                description: 'Secondary 6\'-6" entry gate on the right wall of the main hall opening directly into the unwalled 8\'-0" × 21\'-0" open yard.',
                 connections: ['g_common_bath', 'g_main_entry', 'g_dining']
             },
             {
@@ -1287,9 +1312,9 @@
                 codedColor: 0x0284c7,
                 svgFill: 'rgba(56, 189, 248, 0.30)',
                 svgStroke: '#38bdf8',
-                dim: "17'-6\" × 4'-6\" Exterior Flight",
+                dim: "11'-6\" × 4'-0\" Exterior Flight",
                 stackInfo: 'Ascends outside to Ref 4 on 1st Fl Balcony',
-                description: 'Outdoor staircase outside the bottom-left corner below the kitchen, ascending directly to Ref 4 on 1st Floor Balcony Side 1 without entering the ground floor.',
+                description: 'Outdoor staircase (11\'-6" × 4\'-0") outside the bottom-left corner, ascending directly to Ref 4 on 1st Floor Balcony Side 1 without entering the ground floor.',
                 connections: ['stairs_ref4', 'f1_balc_side1']
             }
         ];
@@ -1297,7 +1322,7 @@
         /***********************************************************************
          * 2. FATHER'S 8-STATION GUIDED TOUR & 360° EYE-LEVEL WALKTHROUGH SPOTS
          ***********************************************************************/
-        const FATHER_TOUR_STATIONS = [
+const FATHER_TOUR_STATIONS = [
             {
                 step: 1,
                 id: 'g_main_entry',
@@ -2587,24 +2612,27 @@
          ***********************************************************************/
         function createFloating3DPins() {
             const container = document.getElementById('labels-container');
+            if (!container) return;
             container.innerHTML = '';
 
             PLAN_ELEMENTS.forEach(el => {
                 const pin = document.createElement('div');
                 pin.className = 'label-3d px-2 py-0.5 rounded-md text-[10px] font-mono font-semibold border shadow-md flex items-center gap-1';
 
+                const dimBadge = `<span class="measure-sub text-[9px] text-cyan-300 font-mono font-normal ml-1 px-1 py-0.2 rounded bg-cyan-950/80 border border-cyan-500/40" style="${showMeasurements ? '' : 'display:none;'}">${el.dim}</span>`;
+
                 if (el.category === 'doors') {
                     pin.className += ' bg-emerald-950/90 text-emerald-300 border-emerald-400/60';
-                    pin.innerHTML = `<i class="fa-solid fa-door-open text-[9px]"></i><span>${el.shortTag} (Open)</span>`;
+                    pin.innerHTML = `<i class="fa-solid fa-door-open text-[9px]"></i><span>${el.shortTag}</span>${dimBadge}`;
                 } else if (el.category === 'stairs') {
                     pin.className += ' bg-purple-950/90 text-purple-200 border-purple-400/60';
-                    pin.innerHTML = `<i class="fa-solid fa-stairs text-[9px]"></i><span>${el.shortTag}</span>`;
+                    pin.innerHTML = `<i class="fa-solid fa-stairs text-[9px]"></i><span>${el.shortTag}</span>${dimBadge}`;
                 } else if (el.category === 'void') {
                     pin.className += ' bg-amber-950/95 text-amber-300 border-amber-400/70';
-                    pin.innerHTML = `<i class="fa-solid fa-eye text-[9px]"></i><span>${el.shortTag}</span>`;
+                    pin.innerHTML = `<i class="fa-solid fa-eye text-[9px]"></i><span>${el.shortTag}</span>${dimBadge}`;
                 } else {
                     pin.className += ' bg-slate-900/90 text-slate-100 border-slate-600/70';
-                    pin.innerHTML = `<span>${el.shortTag}</span>`;
+                    pin.innerHTML = `<span>${el.shortTag}</span>${dimBadge}`;
                 }
 
                 pin.onclick = (e) => {
@@ -2737,8 +2765,12 @@
             svg.appendChild(g);
         }
 
-        function drawDimensionLineSVG(svg, x1, y1, x2, y2, labelText, offset = -14) {
+        function drawDimensionLineSVG(svg, x1, y1, x2, y2, labelText, offset = -14, strokeColor = '#38bdf8', textColor = '#7dd3fc') {
             const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+            g.setAttribute('class', 'cad-dimension');
+            if (!showMeasurements) {
+                g.style.display = 'none';
+            }
             const isHoriz = Math.abs(y2 - y1) < 1;
             const lx1 = isHoriz ? x1 : x1 + offset;
             const ly1 = isHoriz ? y1 + offset : y1;
@@ -2746,15 +2778,16 @@
             const ly2 = isHoriz ? y2 + offset : y2;
 
             g.innerHTML = `
-                <line x1="${lx1}" y1="${ly1}" x2="${lx2}" y2="${ly2}" stroke="#38bdf8" stroke-width="1" stroke-dasharray="2 2"/>
-                <circle cx="${lx1}" cy="${ly1}" r="2" fill="#38bdf8"/>
-                <circle cx="${lx2}" cy="${ly2}" r="2" fill="#38bdf8"/>
-                <text x="${(lx1 + lx2) / 2}" y="${(ly1 + ly2) / 2 + (isHoriz ? -4 : 3)}" text-anchor="middle" fill="#7dd3fc" font-size="8" font-family="JetBrains Mono">${labelText}</text>
+                <line x1="${lx1}" y1="${ly1}" x2="${lx2}" y2="${ly2}" stroke="${strokeColor}" stroke-width="1.2" stroke-dasharray="2 2"/>
+                <circle cx="${lx1}" cy="${ly1}" r="2" fill="${strokeColor}"/>
+                <circle cx="${lx2}" cy="${ly2}" r="2" fill="${strokeColor}"/>
+                <rect x="${(lx1 + lx2) / 2 - labelText.length * 2.8}" y="${(ly1 + ly2) / 2 + (isHoriz ? -12 : -5)}" width="${labelText.length * 5.6 + 6}" height="11" rx="2" fill="rgba(15, 23, 42, 0.85)"/>
+                <text x="${(lx1 + lx2) / 2}" y="${(ly1 + ly2) / 2 + (isHoriz ? -4 : 3)}" text-anchor="middle" fill="${textColor}" font-size="8" font-weight="600" font-family="JetBrains Mono">${labelText}</text>
             `;
             svg.appendChild(g);
         }
 
-        function renderSingleFloorSVG(svgId, floorKey) {
+function renderSingleFloorSVG(svgId, floorKey) {
             const svg = document.getElementById(svgId);
             if (!svg) return;
             svg.innerHTML = '';
@@ -2791,27 +2824,31 @@
                 openNote.setAttribute('x', 18.6 * SVG_SCALE);
                 openNote.setAttribute('y', 9.5 * SVG_SCALE);
                 openNote.setAttribute('text-anchor', 'middle');
-                openNote.setAttribute('fill', '#64748b');
+                openNote.setAttribute('fill', '#94a3b8');
                 openNote.setAttribute('font-size', '7.5');
                 openNote.setAttribute('font-family', 'JetBrains Mono');
                 openNote.setAttribute('transform', `rotate(90, ${18.6 * SVG_SCALE}, ${9.5 * SVG_SCALE})`);
-                openNote.textContent = 'OPEN (NO WALL AFTER COMMON BATH)';
+                openNote.textContent = 'OPEN (NO WALL AFTER COMMON BATH) - 8\'-0" × 21\'-0" YARD';
                 svg.appendChild(openNote);
             }
 
             // Compass Rose
             drawCompassRoseSVG(svg, 422, 25);
 
-            // Exterior Dimension Callouts
-            drawDimensionLineSVG(svg, 0, 0, 400, 0, "60'-0\" OVERALL WIDTH", -38);
-            drawDimensionLineSVG(svg, 0, 0, 0, 280, "42'-0\"", -22);
+            // Exterior Dimension Callouts (Validated Indian Civil Diagram Measurements)
             if (floorKey === 'first') {
-                drawDimensionLineSVG(svg, 0, 0, 172, 0, "25'-9\" (Bed 1)", -6);
-                drawDimensionLineSVG(svg, 172, 0, 344, 0, "25'-9\" (Bed 2)", -6);
-                drawDimensionLineSVG(svg, 344, 0, 400, 0, "8'-6\" (Balc 2)", -6);
+                drawDimensionLineSVG(svg, 0, 0, 400, 0, "33'-3\" OVERALL WIDTH  (3'-0\" + 11'-3\" + 11'-0\" + 8'-0\")", -38, "#f59e0b", "#fde68a");
+                drawDimensionLineSVG(svg, 0, 0, 0, 280, "42'-9\" OVERALL LENGTH", -22, "#f59e0b", "#fde68a");
+                drawDimensionLineSVG(svg, 0, 0, 140, 0, "11'-3\" (Bed 1)", -8, "#38bdf8", "#7dd3fc");
+                drawDimensionLineSVG(svg, 140, 0, 280, 0, "11'-0\" (Bed 2)", -8, "#818cf8", "#a5b4fc");
+                drawDimensionLineSVG(svg, 280, 0, 400, 0, "8'-0\" (Balcony 2)", -8, "#2dd4bf", "#5eead4");
             } else {
-                drawDimensionLineSVG(svg, 0, 0, 224, 0, "33'-6\" (Master Suite)", -10);
-                drawDimensionLineSVG(svg, 344, 0, 400, 0, "8'-6\" (Common Bath)", -10);
+                drawDimensionLineSVG(svg, 0, 0, 400, 0, "33'-3\" OVERALL WIDTH  (3'-0\" + 15'-0\" + 7'-3\" + 8'-0\")", -38, "#f59e0b", "#fde68a");
+                drawDimensionLineSVG(svg, 0, 0, 0, 280, "42'-6\" OVERALL LENGTH", -22, "#f59e0b", "#fde68a");
+                drawDimensionLineSVG(svg, 0, 0, 150, 0, "15'-0\" (Master Suite)", -10, "#38bdf8", "#7dd3fc");
+                drawDimensionLineSVG(svg, 150, 0, 222, 0, "7'-3\" (Utility Alcove)", -10, "#94a3b8", "#cbd5e1");
+                drawDimensionLineSVG(svg, 222, 0, 302, 0, "8'-0\" (Common Bath)", -10, "#2dd4bf", "#5eead4");
+                drawDimensionLineSVG(svg, 302, 0, 400, 0, "OPEN YARD (8\'×21\')", -10, "#f97316", "#fdba74");
             }
 
             const elements = PLAN_ELEMENTS.filter(e => e.floor === floorKey);
@@ -2887,11 +2924,14 @@
 
                 if (el.category !== 'doors') {
                     const dimTxt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                    dimTxt.setAttribute('class', 'cad-dimension');
+                    if (!showMeasurements) dimTxt.style.display = 'none';
                     dimTxt.setAttribute('x', cx);
                     dimTxt.setAttribute('y', cy + 9);
                     dimTxt.setAttribute('text-anchor', 'middle');
                     dimTxt.setAttribute('fill', '#cbd5e1');
                     dimTxt.setAttribute('font-size', '7.5');
+                    dimTxt.setAttribute('font-weight', '600');
                     dimTxt.setAttribute('font-family', 'JetBrains Mono');
                     dimTxt.textContent = el.dim;
                     g.appendChild(dimTxt);
@@ -2900,17 +2940,158 @@
                 svg.appendChild(g);
             });
 
-            // Door Swing Arcs
+            // Draw Doors and Swings
             if (floorKey === 'first') {
-                drawDoorSwingArcSVG(svg, 6.4 * SVG_SCALE, 5.2 * SVG_SCALE, 26, -90, 0, 'door_f1d1');   // f1 d1
-                drawDoorSwingArcSVG(svg, 10.4 * SVG_SCALE, 5.2 * SVG_SCALE, 26, -90, 0, 'door_f1d2');  // f1 d2
-                drawDoorSwingArcSVG(svg, 14.4 * SVG_SCALE, 11.6 * SVG_SCALE, 28, 0, 90, 'door_f1d3');  // f1 d3
-                drawDoorSwingArcSVG(svg, 11.6 * SVG_SCALE, 0, 24, -90, 0, 'door_f1d4');                // f1 d4
-                drawDoorSwingArcSVG(svg, 4.8 * SVG_SCALE, 0, 24, -90, 0, 'door_f1d5');                 // f1 d5
+                drawDoorSwingArcSVG(svg, 6.4 * SVG_SCALE, 5.05 * SVG_SCALE, 20, 0, 90, 'door_f1d1');
+                drawDoorSwingArcSVG(svg, 10.4 * SVG_SCALE, 5.05 * SVG_SCALE, 20, 90, 180, 'door_f1d2');
+                drawDoorSwingArcSVG(svg, 14.4 * SVG_SCALE, 11.42 * SVG_SCALE, 20, 180, 270, 'door_f1d3');
+                drawDoorSwingArcSVG(svg, 11.6 * SVG_SCALE, -0.18 * SVG_SCALE, 20, 270, 360, 'door_f1d4');
+                drawDoorSwingArcSVG(svg, 4.8 * SVG_SCALE, -0.18 * SVG_SCALE, 20, 270, 360, 'door_f1d5');
             } else {
-                drawDoorSwingArcSVG(svg, 11.2 * SVG_SCALE, 14 * SVG_SCALE, 34, -90, 0, 'g_main_entry');   // Main Entry
-                drawDoorSwingArcSVG(svg, 17.2 * SVG_SCALE, 8.6 * SVG_SCALE, 32, 90, 180, 'g_second_entry'); // Second Entry
+                drawDoorSwingArcSVG(svg, 11.2 * SVG_SCALE, 13.65 * SVG_SCALE, 24, 180, 270, 'g_main_entry');
+                drawDoorSwingArcSVG(svg, 17.0 * SVG_SCALE, 8.6 * SVG_SCALE, 20, 270, 360, 'g_second_entry');
             }
+        }
+
+function renderCivilPlanSVG(svgId) {
+            const svg = document.getElementById(svgId);
+            if (!svg) return;
+            svg.innerHTML = '';
+
+            // Dark blueprint grid background
+            const bg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+            bg.setAttribute('x', -50);
+            bg.setAttribute('y', -55);
+            bg.setAttribute('width', 510);
+            bg.setAttribute('height', 415);
+            bg.setAttribute('fill', '#071022');
+            svg.appendChild(bg);
+
+            // Title block banner
+            const titleG = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+            titleG.innerHTML = `
+                <rect x="-40" y="-48" width="480" height="26" rx="4" fill="rgba(15, 23, 42, 0.95)" stroke="#334155" stroke-width="1.2"/>
+                <text x="200" y="-31" text-anchor="middle" fill="#38bdf8" font-size="9.5" font-weight="bold" font-family="JetBrains Mono">
+                    CIVIL CONSTRUCTION BLUEPRINT  |  ENVELOPE: 33'-3" (W) × 42'-6" / 42'-9" (L)
+                </text>
+            `;
+            svg.appendChild(titleG);
+
+            // Compass Rose
+            drawCompassRoseSVG(svg, 422, 25);
+
+            // Setback Boundary (Coral Dashed Line)
+            const setbackG = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+            setbackG.setAttribute('class', 'cad-dimension');
+            if (!showMeasurements) setbackG.style.display = 'none';
+            setbackG.innerHTML = `
+                <line x1="-30" y1="0" x2="-30" y2="280" stroke="#f43f5e" stroke-width="1.2" stroke-dasharray="4 3"/>
+                <text x="-34" y="140" text-anchor="middle" fill="#fda4af" font-size="7.5" font-family="JetBrains Mono" transform="rotate(-90 -34 140)">3'-0" WEST OUTER SETBACK</text>
+
+                <line x1="0" y1="-20" x2="400" y2="-20" stroke="#f43f5e" stroke-width="1.2" stroke-dasharray="4 3"/>
+                <text x="200" y="-24" text-anchor="middle" fill="#fda4af" font-size="7.5" font-family="JetBrains Mono">3'-0" NORTH OUTER SPACE (SETBACK)</text>
+
+                <line x1="0" y1="295" x2="344" y2="295" stroke="#f43f5e" stroke-width="1" stroke-dasharray="3 3"/>
+                <text x="172" y="306" text-anchor="middle" fill="#fda4af" font-size="7.5" font-family="JetBrains Mono">4'-0" OPEN SIT-OUT (UNDER 1ST FL BALCONY)</text>
+            `;
+            svg.appendChild(setbackG);
+
+            // Building Envelope in Gold
+            const envRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+            envRect.setAttribute('x', 0);
+            envRect.setAttribute('y', 0);
+            envRect.setAttribute('width', 400);
+            envRect.setAttribute('height', 280);
+            envRect.setAttribute('fill', 'rgba(15, 23, 42, 0.7)');
+            envRect.setAttribute('stroke', '#f59e0b');
+            envRect.setAttribute('stroke-width', '2.5');
+            svg.appendChild(envRect);
+
+            // Render all Ground & 1st Floor Rooms with color-coded clear spans
+            PLAN_ELEMENTS.filter(e => e.floor === 'ground' || e.id === 'f1_p2').forEach(el => {
+                const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                g.setAttribute('class', `svg-zone ${el.id === selectedElementId ? 'selected-zone' : ''}`);
+                g.onclick = () => selectElementById(el.id);
+
+                const x = el.x * SVG_SCALE;
+                const y = el.z * SVG_SCALE;
+                const w = el.w * SVG_SCALE;
+                const h = el.d * SVG_SCALE;
+
+                const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                rect.setAttribute('x', x);
+                rect.setAttribute('y', y);
+                rect.setAttribute('width', w);
+                rect.setAttribute('height', h);
+                rect.setAttribute('rx', el.id === 'f1_p2' ? '6' : '2');
+                rect.setAttribute('fill', el.svgFill);
+                rect.setAttribute('stroke', el.svgStroke);
+                rect.setAttribute('stroke-width', el.category === 'doors' ? '1.5' : '2');
+                if (el.id === 'f1_p2') rect.setAttribute('stroke-dasharray', '5 3');
+                g.appendChild(rect);
+
+                // Room text
+                const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                text.setAttribute('x', x + w / 2);
+                text.setAttribute('y', y + h / 2 - 3);
+                text.setAttribute('text-anchor', 'middle');
+                text.setAttribute('dominant-baseline', 'middle');
+                text.setAttribute('fill', '#f8fafc');
+                text.setAttribute('font-size', '8.5');
+                text.setAttribute('font-weight', '700');
+                text.textContent = el.shortTag;
+                g.appendChild(text);
+
+                // Measurement badge
+                const dimTxt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                dimTxt.setAttribute('class', 'cad-dimension');
+                if (!showMeasurements) dimTxt.style.display = 'none';
+                dimTxt.setAttribute('x', x + w / 2);
+                dimTxt.setAttribute('y', y + h / 2 + 9);
+                dimTxt.setAttribute('text-anchor', 'middle');
+                dimTxt.setAttribute('fill', '#38bdf8');
+                dimTxt.setAttribute('font-size', '7.5');
+                dimTxt.setAttribute('font-weight', '600');
+                dimTxt.setAttribute('font-family', 'JetBrains Mono');
+                dimTxt.textContent = el.dim;
+                g.appendChild(dimTxt);
+
+                svg.appendChild(g);
+            });
+
+            // Exterior Dimensions Snapped
+            drawDimensionLineSVG(svg, 0, 0, 400, 0, "33'-3\" OVERALL WIDTH  (3'-0\" + 15'-0\" + 7'-3\" + 8'-0\")", -34, "#f59e0b", "#fde68a");
+            drawDimensionLineSVG(svg, 0, 0, 0, 280, "42'-6\" GF  /  42'-9\" 1F LENGTH", -18, "#f59e0b", "#fde68a");
+            drawDimensionLineSVG(svg, 0, 0, 150, 0, "10'-0\" CLEAR BED (15'-0\" SUITE)", -8, "#38bdf8", "#7dd3fc");
+            drawDimensionLineSVG(svg, 150, 0, 224, 0, "7'-3\" UTILITY (DROP BEAM)", -8, "#94a3b8", "#cbd5e1");
+            drawDimensionLineSVG(svg, 224, 0, 304, 0, "8'-0\" COMMON BATH", -8, "#2dd4bf", "#5eead4");
+            drawDimensionLineSVG(svg, 304, 0, 400, 0, "8'-0\" × 21'-0\" OPEN YARD", -8, "#f97316", "#fdba74");
+
+            // Snapped Stair & Dining dimensions
+            drawDimensionLineSVG(svg, 0, 110, 68, 110, "10'-3\" STAIR SPAN", 8, "#c084fc", "#ddd6fe");
+            drawDimensionLineSVG(svg, 100, 128, 200, 128, "10'-0\" DINING CORE", 8, "#fbbf24", "#fde68a");
+            drawDimensionLineSVG(svg, 0, 164, 136, 164, "11'-6\" L-BASE KITCHEN", 8, "#fb7185", "#fda4af");
+
+            // Open yard annotation
+            const openNote = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            openNote.setAttribute('x', 352);
+            openNote.setAttribute('y', 190);
+            openNote.setAttribute('text-anchor', 'middle');
+            openNote.setAttribute('fill', '#94a3b8');
+            openNote.setAttribute('font-size', '8');
+            openNote.setAttribute('font-family', 'JetBrains Mono');
+            openNote.textContent = 'OPEN (NO WALL AFTER COMMON BATH)';
+            svg.appendChild(openNote);
+
+            // Bottom Civil Legend
+            const legG = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+            legG.innerHTML = `
+                <rect x="-40" y="320" width="480" height="22" rx="4" fill="rgba(15, 23, 42, 0.95)" stroke="#334155" stroke-width="1"/>
+                <text x="200" y="334" text-anchor="middle" fill="#94a3b8" font-size="7.5" font-family="JetBrains Mono">
+                    LEGEND: <tspan fill="#f59e0b">■ GOLD: Envelope (33'3"×42'6")</tspan>  |  <tspan fill="#f43f5e">■ CORAL: Setbacks (3'-0")</tspan>  |  <tspan fill="#38bdf8">■ CYAN: Clear Spans</tspan>  |  <tspan fill="#fbbf24">■ AMBER: Void Cutout (12'×8')</tspan>
+                </text>
+            `;
+            svg.appendChild(legG);
         }
 
         function renderOverlayFloorSVG(svgId) {
@@ -3716,6 +3897,26 @@
         }
 
         function togglePinLabels(checked) { showPinLabels = checked; }
+
+        let showMeasurements = true;
+        function toggleMeasurements(checked) {
+            showMeasurements = !!checked;
+            document.querySelectorAll('#toggle-measurements, .measurements-toggle-input').forEach(cb => {
+                cb.checked = showMeasurements;
+            });
+            const measureTxt = document.getElementById('vl-2d-measure-text');
+            if (measureTxt) measureTxt.textContent = showMeasurements ? 'Hide Measurements' : 'Show Measurements';
+
+            document.querySelectorAll('.measure-sub, .cad-dimension, .cad-3d-measure').forEach(el => {
+                el.style.display = showMeasurements ? '' : 'none';
+            });
+            document.body.classList.toggle('hide-measurements', !showMeasurements);
+
+            if (typeof activeViewListItem !== 'undefined' && activeViewListItem && activeViewListItem.type === '2d') {
+                renderViewList2D(activeViewListItem);
+            }
+        }
+
         function toggleHotspotMarkers(checked) { showHotspots = checked; }
 
         function updateCameraTransform() {
@@ -3783,140 +3984,170 @@
         const VIEW_LIST_ITEMS = [
             {
                 id: 1,
-                number: "1",
-                type: "3d",
+                number: '1',
+                type: '3d',
                 title: "3D View + Full Walls + Zone Colors + Elevation (Day & Dusk) + Full Exterior + Roof",
-                shortTitle: "3D Full Exterior + Roof Elevation",
-                badge: "Full Exterior + Roof",
-                badgeColor: "emerald",
-                category: "3d",
-                floorFilter: "roof",
-                wallMode: "full",
-                theme: "coded",
-                defaultLight: "day",
+                shortTitle: '3D Full Exterior + Roof Elevation',
+                badge: 'Full Exterior + Roof',
+                badgeColor: 'emerald',
+                category: '3d',
+                floorFilter: 'roof',
+                wallMode: 'full',
+                theme: 'coded',
+                defaultLight: 'day',
                 camera: { theta: 0.0, phi: 1.42, radius: 28.0, tx: 10, ty: 2.8, tz: 7.0 },
                 tags: ["3D View", "Full Walls (10')", "Zone Colors", "Elevation (Day & Dusk)", "Full Exterior + Roof"],
                 description: "Complete 2-story building massing with full-height walls, roof slab, glass skylight dome, and parapet walls. South front street elevation showing color-coded functional zones with Day and Dusk lighting."
             },
             {
                 id: 2,
-                number: "2",
-                type: "3d",
+                number: '2',
+                type: '3d',
                 title: "3D View + Full Walls + Zone Colors + Elevation (Day & Dusk) — Ground Floor",
-                shortTitle: "3D Ground Floor Elevation",
-                badge: "Ground Floor",
-                badgeColor: "amber",
-                category: "ground",
-                floorFilter: "ground",
-                wallMode: "full",
-                theme: "coded",
-                defaultLight: "day",
+                shortTitle: '3D Ground Floor Elevation',
+                badge: 'Ground Floor',
+                badgeColor: 'amber',
+                category: 'ground',
+                floorFilter: 'ground',
+                wallMode: 'full',
+                theme: 'coded',
+                defaultLight: 'day',
                 camera: { theta: 0.0, phi: 1.42, radius: 24.0, tx: 10, ty: 1.3, tz: 7.0 },
                 tags: ["3D View", "Full Walls (10')", "Zone Colors", "Elevation (Day & Dusk)", "Ground Floor"],
-                description: "Ground floor isolated with 10' full walls, master bedroom suite, central dining core, drawing hall, puja room, kitchen, and bathroom. Day and Dusk elevation."
+                description: "Ground floor isolated with 10' full walls, master bedroom suite (10'×10'6\"), utility alcove (7'3\"×10'6\"), central dining core (10'×6'6\"), puja room, and kitchen. Day and Dusk elevation."
             },
             {
                 id: 3,
-                number: "3",
-                type: "3d",
+                number: '3',
+                type: '3d',
                 title: "3D View + Full Walls + Zone Colors + Elevation (Day & Dusk) — First Floor",
-                shortTitle: "3D First Floor Elevation",
-                badge: "First Floor",
-                badgeColor: "sky",
-                category: "first",
-                floorFilter: "first",
-                wallMode: "full",
-                theme: "coded",
-                defaultLight: "day",
+                shortTitle: '3D First Floor Elevation',
+                badge: 'First Floor',
+                badgeColor: 'sky',
+                category: 'first',
+                floorFilter: 'first',
+                wallMode: 'full',
+                theme: 'coded',
+                defaultLight: 'day',
                 camera: { theta: 0.0, phi: 1.42, radius: 24.0, tx: 10, ty: 4.6, tz: 7.0 },
                 tags: ["3D View", "Full Walls (10')", "Zone Colors", "Elevation (Day & Dusk)", "First Floor"],
-                description: "First floor isolated with 10' full walls, P1 family lobby, central P2 double-height cutout overlooking the dining space, upper bedrooms 1 & 2, and dual balconies. Day and Dusk elevation."
+                description: "First floor isolated with 10' full walls, P1 family lobby, central P2 double-height cutout (12'×8') overlooking dining space, upper bedrooms 1 (11'3\"×10'6\") & 2 (11'0\"×10'6\"), and dual balconies."
             },
             {
                 id: 4,
-                number: "4",
-                type: "2d",
-                subType: "ground",
+                number: '4',
+                type: '2d',
+                subType: 'ground',
                 title: "2D CAD Plan — Ground Floor Dimensioned Construction Blueprint",
-                shortTitle: "2D Ground Floor CAD Plan",
-                badge: "2D Blueprint",
-                badgeColor: "amber",
-                category: "2d",
-                tags: ["2D CAD", "Ground Floor", "Dimensions (60'×42')", "Columns & Doors"],
-                description: "High-precision architectural 2D blueprint showing wall dimensions in feet & inches, column locations, room square footages, and door swings for Ground Floor."
+                shortTitle: '2D Ground Floor CAD Plan',
+                badge: '2D Blueprint',
+                badgeColor: 'amber',
+                category: '2d',
+                tags: ['2D CAD', 'Ground Floor', 'Envelope (33\'3"×42\'6")', 'Master 10\'×10\'6"', 'Utility 7\'3"×10\'6"'],
+                description: "High-precision architectural 2D blueprint showing validated Indian Civil dimensions (33'-3\" × 42'-6\" envelope), 3'-0\" setbacks, room clear spans, drop beam above utility, and door swings for Ground Floor."
             },
             {
                 id: 5,
-                number: "5",
-                type: "2d",
-                subType: "first",
+                number: '5',
+                type: '2d',
+                subType: 'first',
                 title: "2D CAD Plan — First Floor Dimensioned Blueprint (P2 Central Void)",
-                shortTitle: "2D First Floor CAD Plan",
-                badge: "2D Blueprint",
-                badgeColor: "emerald",
-                category: "2d",
-                tags: ["2D CAD", "First Floor", "P2 Void (28'×10'9\")", "Balconies"],
-                description: "Detailed 2D blueprint featuring the 28'-0\" × 10'-9\" P2 double-height central void, upper bedrooms, and balcony dimensions."
+                shortTitle: '2D First Floor CAD Plan',
+                badge: '2D Blueprint',
+                badgeColor: 'emerald',
+                category: '2d',
+                tags: ['2D CAD', 'First Floor', 'Envelope (33\'3"×42\'9")', 'P2 Void (12\'×8\')', 'Dual Balconies'],
+                description: "Detailed 2D blueprint featuring the 12'-0\" × 8'-0\" P2 double-height central void cutout, upper bedrooms 1 (11'3\"×10'6\") & 2 (11'0\"×10'6\") with 2'7\" attached baths, and 22'3\" front balcony."
             },
             {
                 id: 6,
-                number: "6",
-                type: "2d",
-                subType: "overlay",
+                number: '6',
+                type: '2d',
+                subType: 'overlay',
                 title: "2D CAD Superimposed Alignment X-Ray Overlay",
-                shortTitle: "2D Superimposed X-Ray",
-                badge: "2D Overlay",
-                badgeColor: "purple",
-                category: "2d",
-                tags: ["2D Overlay", "Vertical Alignment", "P2 over Dining", "Bed 1 over Master"],
-                description: "Dual-floor stacked CAD overlay proving vertical alignment of the P2 open void directly above the ground floor dining table."
+                shortTitle: '2D Superimposed X-Ray',
+                badge: '2D Overlay',
+                badgeColor: 'purple',
+                category: '2d',
+                tags: ['2D Overlay', 'Vertical Alignment', 'P2 over Dining', 'Bed 2 over Utility'],
+                description: "Dual-floor stacked CAD overlay proving vertical alignment of the 12'×8' P2 open void directly above the ground floor dining table, and Bed 2 supported above the 7'-3\" utility drop beam."
             },
             {
                 id: 7,
-                number: "7",
-                type: "2d",
-                subType: "section",
+                number: '7',
+                type: '2d',
+                subType: 'section',
                 title: "2D Architectural Cross-Section Drawing (Section A–A)",
-                shortTitle: "2D Cross-Section A-A",
-                badge: "2D Section",
-                badgeColor: "rose",
-                category: "2d",
-                tags: ["2D Section", "Transverse Cut", "Ceiling 10'-6\"", "P2 Void 21'-6\""],
+                shortTitle: '2D Cross-Section A-A',
+                badge: '2D Section',
+                badgeColor: 'rose',
+                category: '2d',
+                tags: ['2D Section', 'Transverse Cut', 'Ceiling 10\'-6"', 'P2 Void 21\'-6"'],
                 description: "Transverse vertical cross-section showing plinth level (+2'-0\"), ground ceiling (10'-6\"), double-height core (21'-6\"), and roof slab."
             },
             {
                 id: 8,
-                number: "8",
-                type: "3d",
+                number: '8',
+                type: '3d',
                 title: "3D Exploded 2-Story Stack View (Zone Colors)",
-                shortTitle: "3D Exploded Stack View",
-                badge: "Exploded 3D",
-                badgeColor: "indigo",
-                category: "3d",
-                floorFilter: "exploded",
-                wallMode: "dollhouse",
-                theme: "coded",
-                defaultLight: "day",
+                shortTitle: '3D Exploded Stack View',
+                badge: 'Exploded 3D',
+                badgeColor: 'indigo',
+                category: '3d',
+                floorFilter: 'exploded',
+                wallMode: 'dollhouse',
+                theme: 'coded',
+                defaultLight: 'day',
                 camera: { theta: 0.65, phi: 0.96, radius: 29.0, tx: 10, ty: 2.8, tz: 7.0 },
-                tags: ["3D Exploded", "3.6m Separation", "Dual Stairs", "Spatial Flow"],
+                tags: ['3D Exploded', '3.6m Separation', 'Dual Stairs', 'Spatial Flow'],
                 description: "Ground and first floors pulled apart vertically by 3.6m in 3D to reveal internal staircases (Ref 1-4) and double-height void connectivity."
             },
             {
                 id: 9,
-                number: "9",
-                type: "3d",
+                number: '9',
+                type: '3d',
                 title: "3D Both Floors Dollhouse Cutaway (Realistic Finishes)",
-                shortTitle: "3D Dollhouse Cutaway",
-                badge: "Dollhouse 3D",
-                badgeColor: "emerald",
-                category: "3d",
-                floorFilter: "both",
-                wallMode: "dollhouse",
-                theme: "realistic",
-                defaultLight: "day",
+                shortTitle: '3D Dollhouse Cutaway',
+                badge: 'Dollhouse 3D',
+                badgeColor: 'emerald',
+                category: '3d',
+                floorFilter: 'both',
+                wallMode: 'dollhouse',
+                theme: 'realistic',
+                defaultLight: 'day',
                 camera: { theta: 0.58, phi: 0.88, radius: 26.5, tx: 10, ty: 2.0, tz: 7.0 },
-                tags: ["3D Dollhouse", "4.5' Half-Walls", "Realistic Materials", "Wood & Marble"],
+                tags: ['3D Dollhouse', '4.5\' Half-Walls', 'Realistic Materials', 'Wood & Marble'],
                 description: "Low cutaway walls allowing immediate visual inspection of furniture layouts and room adjacencies with realistic wood and tile textures."
+            },
+            {
+                id: 10,
+                number: '10',
+                type: '2d',
+                subType: 'civil',
+                title: "2D Civil Construction Plan — Setbacks, Envelopes & Detailed Dimensions",
+                shortTitle: '2D Civil Setbacks & Envelopes Plan',
+                badge: 'Civil Validated',
+                badgeColor: 'teal',
+                category: '2d',
+                tags: ['Civil Validated', 'Setbacks (3\'-0")', 'Envelope 33\'3"×42\'6"', 'Clear Spans', 'Indian Civil'],
+                description: "Official Indian Civil validated construction blueprint displaying strict site setbacks (North 3'-0\", West 3'-0\", Front 4'-0\" sit-out), overall building envelopes (33'-3\" × 42'-6\" GF / 42'-9\" 1F), room clear spans, drop beam, and unwalled 8'×21' yard."
+            },
+            {
+                id: 11,
+                number: '11',
+                type: '3d',
+                title: "3D Master Suite & Central P2 Void Cutout Elevation (Day & Dusk)",
+                shortTitle: '3D Master Suite & P2 Void Elevation',
+                badge: 'Master & P2 Void',
+                badgeColor: 'rose',
+                category: 'ground',
+                floorFilter: 'ground',
+                wallMode: 'full',
+                theme: 'coded',
+                defaultLight: 'day',
+                camera: { theta: 0.38, phi: 1.28, radius: 19.0, tx: 7.2, ty: 1.6, tz: 6.2 },
+                tags: ['3D View', 'Master Suite (15\'×10\'6")', 'P2 Void (12\'×8\')', 'Full Walls (10\')', 'Elevation (Day & Dusk)'],
+                description: "Focused 3D elevation highlighting the 15'-0\" × 10'-6\" Master Suite (10'-0\" × 10'-6\" clear bed with 5'-0\" bath), adjacent 7'-3\" × 10'-6\" utility bay, and the 12'-0\" × 8'-0\" double-height P2 void core with Day and Dusk illumination."
             }
         ];
 
@@ -4089,13 +4320,14 @@
             }
 
             // Update sub-tabs in 2D toolbar
-            ['g', 'f', 'o', 's'].forEach(k => {
+            ['g', 'f', 'o', 's', 'c'].forEach(k => {
                 const b = document.getElementById(`vl-2d-btn-${k}`);
                 if (!b) return;
                 const match = (k === 'g' && item.subType === 'ground') ||
                               (k === 'f' && item.subType === 'first') ||
                               (k === 'o' && item.subType === 'overlay') ||
-                              (k === 's' && item.subType === 'section');
+                              (k === 's' && item.subType === 'section') ||
+                              (k === 'c' && item.subType === 'civil');
                 b.className = match
                     ? 'px-2.5 py-1 rounded text-xs font-semibold bg-emerald-600 text-white shadow transition'
                     : 'px-2.5 py-1 rounded text-xs font-medium text-slate-300 hover:text-white transition';
@@ -4104,7 +4336,10 @@
             const svg = document.getElementById('svg-viewlist-main');
             if (!svg) return;
 
-            if (item.subType === 'section') {
+            if (item.subType === 'civil') {
+                svg.setAttribute('viewBox', '-55 -60 520 420');
+                renderCivilPlanSVG('svg-viewlist-main');
+            } else if (item.subType === 'section') {
                 svg.setAttribute('viewBox', '0 0 880 480');
                 renderCrossSectionSVG('svg-viewlist-main');
             } else if (item.subType === 'overlay') {
