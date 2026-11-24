@@ -262,6 +262,10 @@
                             <i class="fa-solid fa-cloud-sun mr-1 text-amber-500"></i>Sunset
                         </button>
                     </div>
+                    <button id="hud-measure-toggle" onclick="toggleMeasurements(!showMeasurements)" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-cyan-950/80 text-cyan-300 border border-cyan-500/60 hover:bg-cyan-900 transition flex items-center gap-1.5 shadow" title="Toggle 3D & 2D measurements ON/OFF">
+                        <i class="fa-solid fa-ruler-combined text-cyan-400 text-[10px]"></i>
+                        <span id="hud-measure-label">Measurements: ON</span>
+                    </button>
                 </div>
 
                 <!-- Elevation Perspective Angles Presets -->
@@ -2239,6 +2243,21 @@ const FATHER_TOUR_STATIONS = [
                 container.appendChild(pin);
                 pinDomById[el.id] = pin;
             });
+            // 3D Overall Dimensions Badges
+            const wDim = document.createElement('div');
+            wDim.className = 'label-3d cad-3d-measure px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold bg-amber-950/90 text-amber-300 border-2 border-amber-400/80 shadow-lg flex items-center gap-1.5';
+            wDim.style.display = showMeasurements ? '' : 'none';
+            wDim.innerHTML = '<i class="fa-solid fa-ruler-horizontal text-amber-400"></i><span>WIDTH: 33\'-3"</span>';
+            container.appendChild(wDim);
+            pinDomById['overall_width'] = wDim;
+
+            const lDim = document.createElement('div');
+            lDim.className = 'label-3d cad-3d-measure px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold bg-amber-950/90 text-amber-300 border-2 border-amber-400/80 shadow-lg flex items-center gap-1.5';
+            lDim.style.display = showMeasurements ? '' : 'none';
+            lDim.innerHTML = '<i class="fa-solid fa-ruler-vertical text-amber-400"></i><span>LENGTH: 42\'-6"</span>';
+            container.appendChild(lDim);
+            pinDomById['overall_length'] = lDim;
+
         }
 
         function create360HotspotMarkers() {
@@ -3508,14 +3527,28 @@ function renderCivilPlanSVG(svgId) {
             document.querySelectorAll('#toggle-measurements, .measurements-toggle-input').forEach(cb => {
                 cb.checked = showMeasurements;
             });
+
+            // Update 3D HUD toggle button
+            const hudLabel = document.getElementById('hud-measure-label');
+            if (hudLabel) hudLabel.textContent = showMeasurements ? 'Measurements: ON' : 'Measurements: OFF';
+            const hudBtn = document.getElementById('hud-measure-toggle');
+            if (hudBtn) {
+                hudBtn.className = showMeasurements
+                    ? 'px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-cyan-950/80 text-cyan-300 border border-cyan-500/60 hover:bg-cyan-900 transition flex items-center gap-1.5 shadow'
+                    : 'px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-slate-900 text-slate-400 border border-slate-700 hover:text-white transition flex items-center gap-1.5';
+            }
+
+            // Update 2D CAD toolbar button
             const measureTxt = document.getElementById('vl-2d-measure-text');
             if (measureTxt) measureTxt.textContent = showMeasurements ? 'Hide Measurements' : 'Show Measurements';
 
+            // Toggle CSS classes on elements
             document.querySelectorAll('.measure-sub, .cad-dimension, .cad-3d-measure').forEach(el => {
                 el.style.display = showMeasurements ? '' : 'none';
             });
             document.body.classList.toggle('hide-measurements', !showMeasurements);
 
+            // Re-render active 2D view if open
             if (typeof activeViewListItem !== 'undefined' && activeViewListItem && activeViewListItem.type === '2d') {
                 renderViewList2D(activeViewListItem);
             }
