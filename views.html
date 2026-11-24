@@ -214,19 +214,20 @@
                     <input type="checkbox" id="toggle-labels" checked onchange="togglePinLabels(this.checked)" class="rounded accent-emerald-500">
                     <span>Tags</span>
                 </label>
+                <!-- Prominent Measurements Toggle (Show / Hide Dimensions) -->
+                <label class="flex items-center gap-1.5 cursor-pointer text-slate-100 hover:text-white text-[11px] bg-cyan-950/95 hover:bg-cyan-900/90 px-3 py-1 rounded-lg border-2 border-cyan-400/90 shadow-lg shadow-cyan-950/70 transition" title="Show or hide dimension measurements in 3D and 2D CAD">
+                    <input type="checkbox" id="toggle-measurements" checked onchange="toggleMeasurements(this.checked)" class="rounded accent-cyan-400 measurements-toggle-input">
+                    <i class="fa-solid fa-ruler-combined text-cyan-300 text-xs"></i>
+                    <span class="text-cyan-200 font-bold tracking-wide">Measurements</span>
+                </label>
                 <label class="flex items-center gap-1 cursor-pointer text-slate-300 hover:text-white text-[11px] bg-slate-950/80 px-2 py-1 rounded-lg border border-slate-800">
                     <input type="checkbox" id="toggle-hotspots" checked onchange="toggleHotspotMarkers(this.checked)" class="rounded accent-amber-500">
                     <span>360&deg; Spots</span>
                 </label>
-                <label class="flex items-center gap-1.5 cursor-pointer text-slate-300 hover:text-white text-[11px] bg-slate-950/80 px-2.5 py-1 rounded-lg border border-cyan-800/60 transition" title="Show or hide dimension measurements in 3D and 2D CAD">
-                    <input type="checkbox" id="toggle-measurements" checked onchange="toggleMeasurements(this.checked)" class="rounded accent-cyan-400 measurements-toggle-input">
-                    <i class="fa-solid fa-ruler-combined text-cyan-400 text-[10px]"></i>
-                    <span class="text-cyan-300 font-semibold">Measurements</span>
-                </label>
             </div>
 
             <!-- 2. ACTIVE VIEW DETAILS FLOATING CARD (Matches screenshot directly below top bar) -->
-            <div id="viewlist-3d-hud" class="absolute top-14 left-3 bg-slate-900/95 backdrop-blur-md border border-slate-800 rounded-xl p-3 max-w-lg pointer-events-auto shadow-2xl z-20">
+            <div id="viewlist-3d-hud" class="absolute top-[5.25rem] left-3 bg-slate-900/95 backdrop-blur-md border border-slate-800 rounded-xl p-3 max-w-lg pointer-events-auto shadow-2xl z-20">
                 <div class="flex items-center justify-between gap-3 mb-1.5">
                     <div class="flex items-center gap-2">
                         <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
@@ -292,7 +293,7 @@
             </div>
 
             <!-- 3. TOP-RIGHT 3D MATERIAL KEY (Matches screenshot) -->
-            <div class="hidden md:block absolute top-2.5 right-3 bg-slate-900/92 backdrop-blur-md border border-slate-800 rounded-xl p-2.5 pointer-events-auto shadow-2xl w-56 z-20">
+            <div class="hidden md:block absolute top-[5.25rem] right-3 bg-slate-900/92 backdrop-blur-md border border-slate-800 rounded-xl p-2.5 pointer-events-auto shadow-2xl w-56 z-20">
                 <div class="text-[10px] font-mono uppercase tracking-wider text-slate-400 font-bold mb-1.5 flex items-center justify-between">
                     <span>3D Material Key</span>
                     <span class="text-emerald-400">Solid Cutaway</span>
